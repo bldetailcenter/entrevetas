@@ -3,342 +3,676 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Laser Quality System</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<title>EntreVetas — Sistema de Calidad</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0f0f0f;
-  --bg2: #1a1a1a;
-  --bg3: #222;
-  --border: #2e2e2e;
-  --border2: #3a3a3a;
-  --text: #f0ede8;
-  --text2: #888;
-  --text3: #555;
-  --accent: #e8d5a3;
-  --accent2: #c4a96d;
-  --red: #c0392b;
-  --green: #27ae60;
-  --green-bg: #0d2818;
-  --amber: #e67e22;
-  --amber-bg: #2a1a00;
-  --blue: #2980b9;
-  --blue-bg: #0a1a2a;
-  --radius: 8px;
-  --radius-lg: 12px;
+  --cream:    #f5f0e8;
+  --cream2:   #ede6d6;
+  --cream3:   #e3d9c4;
+  --bark:     #2c1f0e;
+  --bark2:    #3d2d18;
+  --bark3:    #5a4228;
+  --moss:     #4a5c3a;
+  --moss2:    #607a4c;
+  --moss3:    #8aaa72;
+  --sand:     #b89a6a;
+  --sand2:    #d4b88a;
+  --sand3:    #e8d4aa;
+  --rust:     #8b4a2a;
+  --rust2:    #b06040;
+  --charcoal: #3a3530;
+  --text:     #2c1f0e;
+  --text2:    #6b5740;
+  --text3:    #a08060;
+  --border:   rgba(44,31,14,0.12);
+  --border2:  rgba(44,31,14,0.22);
+  --shadow:   0 2px 16px rgba(44,31,14,0.10);
+  --shadow-lg: 0 8px 40px rgba(44,31,14,0.15);
+  --radius:   10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
 }
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-a { color: var(--accent); }
 
-/* LAYOUT */
-.app { display: flex; flex-direction: column; min-height: 100vh; }
-header { padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--bg); position: sticky; top: 0; z-index: 100; }
-.logo { font-family: 'DM Mono', monospace; font-size: 15px; color: var(--accent); letter-spacing: 0.05em; }
-.logo span { color: var(--text2); }
-.status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); display: inline-block; margin-right: 6px; }
-.status-dot.offline { background: var(--red); }
-.status-label { font-size: 12px; color: var(--text2); }
+body {
+  font-family: 'Jost', sans-serif;
+  background: var(--cream);
+  color: var(--text);
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
 
-nav { display: flex; gap: 0; padding: 0 24px; border-bottom: 1px solid var(--border); background: var(--bg); overflow-x: auto; }
-nav button { padding: 14px 18px; font-size: 13px; font-weight: 400; font-family: 'DM Sans', sans-serif; border: none; background: none; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: color .15s; }
-nav button.active { color: var(--accent); border-bottom-color: var(--accent); }
-nav button:hover:not(.active) { color: var(--text); }
+/* Grain texture overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.6;
+}
 
-main { flex: 1; padding: 28px 24px; max-width: 960px; margin: 0 auto; width: 100%; }
+/* Wood grain lines */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    88deg,
+    transparent,
+    transparent 40px,
+    rgba(44,31,14,0.012) 40px,
+    rgba(44,31,14,0.012) 41px
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.app { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; }
+
+/* HEADER */
+header {
+  padding: 0 32px;
+  background: var(--bark);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 62px;
+  box-shadow: 0 2px 20px rgba(44,31,14,0.4);
+}
+
+.logo {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.logo-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  color: var(--sand2);
+  letter-spacing: 0.04em;
+}
+.logo-sub {
+  font-size: 11px;
+  color: var(--bark3);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 400;
+}
+.logo-leaf {
+  font-size: 18px;
+  margin-right: 2px;
+}
+
+.header-right { display: flex; align-items: center; gap: 10px; }
+.status-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.08);
+  font-size: 11px;
+  color: var(--sand3);
+  letter-spacing: 0.04em;
+}
+.dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--moss3);
+  box-shadow: 0 0 6px var(--moss3);
+}
+.dot.offline { background: var(--rust2); box-shadow: 0 0 6px var(--rust2); }
+
+/* NAV */
+nav {
+  background: var(--bark2);
+  display: flex;
+  padding: 0 32px;
+  overflow-x: auto;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+nav::-webkit-scrollbar { display: none; }
+
+nav button {
+  font-family: 'Jost', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 14px 20px;
+  background: none;
+  border: none;
+  color: rgba(232,212,170,0.5);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: all .2s;
+  position: relative;
+}
+nav button::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; left: 50%; right: 50%;
+  height: 2px;
+  background: var(--sand2);
+  transition: all .25s;
+}
+nav button.active { color: var(--sand2); }
+nav button.active::after { left: 0; right: 0; }
+nav button:hover:not(.active) { color: rgba(232,212,170,0.8); }
+
+/* MAIN */
+main { flex: 1; padding: 32px; max-width: 980px; margin: 0 auto; width: 100%; }
+
+/* TABS */
+.tab { display: none; animation: fadeUp .3s ease; }
+.tab.active { display: block; }
+@keyframes fadeUp { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+
+/* SECTION HEADER */
+.section-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  color: var(--bark);
+  font-weight: 400;
+}
+.section-title em { font-style: italic; color: var(--sand); }
 
 /* CARDS */
-.card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px 24px; margin-bottom: 12px; }
-.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-.section-title { font-size: 14px; font-weight: 500; color: var(--text); letter-spacing: 0.02em; }
-
-/* GRID */
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
-.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
-@media (max-width: 600px) {
-  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
-  main { padding: 16px; }
-  nav button { padding: 12px 12px; font-size: 12px; }
+.card {
+  background: rgba(255,255,255,0.7);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-lg);
+  padding: 24px 28px;
+  margin-bottom: 14px;
+  backdrop-filter: blur(4px);
+  box-shadow: var(--shadow);
 }
 
-/* FORM */
+/* FORM FIELDS */
 .field { display: flex; flex-direction: column; gap: 6px; }
-.field label { font-size: 11px; font-weight: 500; color: var(--text2); letter-spacing: 0.06em; text-transform: uppercase; }
-.field input, .field select, .field textarea {
-  font-size: 13px; font-family: 'DM Sans', sans-serif;
-  padding: 9px 12px; border-radius: var(--radius);
-  border: 1px solid var(--border2); background: var(--bg3);
-  color: var(--text); width: 100%; transition: border-color .15s;
+.field label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text3);
 }
-.field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--accent2); }
-.field textarea { resize: vertical; min-height: 64px; }
-.field select option { background: var(--bg3); }
-.computed { font-size: 13px; padding: 9px 12px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--bg); color: var(--accent); font-family: 'DM Mono', monospace; }
+.field input, .field select, .field textarea {
+  font-family: 'Jost', sans-serif;
+  font-size: 14px;
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border2);
+  background: rgba(255,255,255,0.8);
+  color: var(--text);
+  width: 100%;
+  transition: border-color .2s, box-shadow .2s;
+  appearance: none;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline: none;
+  border-color: var(--moss2);
+  box-shadow: 0 0 0 3px rgba(74,92,58,0.12);
+}
+.field textarea { resize: vertical; min-height: 72px; }
+.field input[type="file"] { padding: 8px 12px; font-size: 12px; cursor: pointer; }
+.computed {
+  font-size: 15px;
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--cream3);
+  color: var(--moss);
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+}
+
+/* GRIDS */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+
+@media (max-width: 640px) {
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  main { padding: 20px 16px; }
+  header { padding: 0 16px; }
+  nav { padding: 0 8px; }
+  nav button { padding: 13px 12px; font-size: 11px; }
+}
 
 /* BUTTONS */
-.btn { padding: 9px 18px; font-size: 13px; font-weight: 500; font-family: 'DM Sans', sans-serif; border-radius: var(--radius); border: 1px solid var(--border2); background: var(--bg3); color: var(--text); cursor: pointer; transition: all .15s; }
-.btn:hover { border-color: var(--accent2); color: var(--accent); }
-.btn-primary { background: var(--accent); color: #111; border-color: var(--accent); }
-.btn-primary:hover { background: var(--accent2); border-color: var(--accent2); color: #111; }
-.btn-sm { padding: 6px 12px; font-size: 12px; }
-.btn-danger { border-color: #3a1a1a; color: #e74c3c; background: transparent; }
-.btn-danger:hover { background: #1a0808; }
-.btn-icon { padding: 6px 10px; font-size: 14px; }
+.btn {
+  font-family: 'Jost', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  padding: 10px 22px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border2);
+  background: white;
+  color: var(--text);
+  cursor: pointer;
+  transition: all .2s;
+}
+.btn:hover { background: var(--cream2); border-color: var(--sand); }
+.btn-primary {
+  background: var(--moss);
+  color: white;
+  border-color: var(--moss);
+  box-shadow: 0 2px 8px rgba(74,92,58,0.3);
+}
+.btn-primary:hover { background: var(--moss2); border-color: var(--moss2); }
+.btn-sm { padding: 7px 16px; font-size: 12px; }
+.btn-danger { border-color: rgba(139,74,42,0.3); color: var(--rust); background: transparent; }
+.btn-danger:hover { background: rgba(139,74,42,0.06); }
 
 /* LIST ITEMS */
-.list-item { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; display: flex; align-items: center; gap: 14px; margin-bottom: 8px; transition: border-color .15s; }
-.list-item:hover { border-color: var(--border2); }
+.list-item {
+  background: rgba(255,255,255,0.65);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 10px;
+  transition: all .2s;
+  box-shadow: 0 1px 6px rgba(44,31,14,0.05);
+}
+.list-item:hover {
+  background: rgba(255,255,255,0.9);
+  box-shadow: var(--shadow);
+  transform: translateY(-1px);
+  border-color: var(--border2);
+}
 .list-item .info { flex: 1; min-width: 0; }
-.item-name { font-size: 13px; font-weight: 500; color: var(--text); }
-.item-meta { font-size: 12px; color: var(--text2); margin-top: 3px; font-family: 'DM Mono', monospace; }
+.item-name { font-size: 14px; font-weight: 500; color: var(--bark); }
+.item-meta { font-size: 12px; color: var(--text2); margin-top: 3px; }
 .row-actions { display: flex; gap: 6px; flex-shrink: 0; }
 
 /* BADGES */
-.badge { display: inline-block; padding: 3px 9px; border-radius: 4px; font-size: 11px; font-weight: 500; font-family: 'DM Mono', monospace; letter-spacing: 0.03em; }
-.b-wood { background: #2a1f00; color: #d4a843; border: 1px solid #4a3800; }
-.b-acrylic { background: #001a2a; color: #5baad4; border: 1px solid #003a5a; }
-.b-metal { background: #1a1a1a; color: #aaa; border: 1px solid #333; }
-.b-other { background: #0d2010; color: #5ab86c; border: 1px solid #1a4020; }
-.b-engrave { background: #1a0d2a; color: #9b7ed4; border: 1px solid #3a1a5a; }
-.b-cut { background: #2a0d0d; color: #d47e7e; border: 1px solid #5a1a1a; }
-.b-ok { background: var(--green-bg); color: #5ab86c; border: 1px solid #1a4020; }
-.b-partial { background: var(--amber-bg); color: #d4a843; border: 1px solid #4a3800; }
-.b-fail { background: #2a0d0d; color: #d47e7e; border: 1px solid #5a1a1a; }
-.b-active { background: var(--green-bg); color: #5ab86c; border: 1px solid #1a4020; }
-.b-maintenance { background: var(--amber-bg); color: #d4a843; border: 1px solid #4a3800; }
-.b-inactive { background: #1a1a1a; color: #666; border: 1px solid #333; }
-.b-instagram { background: #2a0d1a; color: #d47eb3; border: 1px solid #5a1a3a; }
-.b-wallapop { background: #2a1a00; color: #d4a843; border: 1px solid #4a3800; }
-.b-direct { background: var(--green-bg); color: #5ab86c; border: 1px solid #1a4020; }
-.b-known { background: #001a2a; color: #5baad4; border: 1px solid #003a5a; }
-.b-search { background: #1a0d2a; color: #9b7ed4; border: 1px solid #3a1a5a; }
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+.b-wood    { background: #f0e4cc; color: #6b4015; border: 1px solid #d4b880; }
+.b-acrylic { background: #d8eaf5; color: #1a5070; border: 1px solid #90c0e0; }
+.b-metal   { background: #e8e4de; color: #4a4030; border: 1px solid #b8a890; }
+.b-other   { background: #ddeedd; color: #2a5030; border: 1px solid #88bb88; }
+.b-engrave { background: #ede4f5; color: #4a2070; border: 1px solid #c0a0e0; }
+.b-cut     { background: #f5ddd8; color: #6a2010; border: 1px solid #e0a090; }
+.b-ok      { background: #ddf0dd; color: #1a5020; border: 1px solid #80c080; }
+.b-partial { background: #f5eccc; color: #6a4a00; border: 1px solid #d4b040; }
+.b-fail    { background: #f5ddd8; color: #6a2010; border: 1px solid #e0a090; }
+.b-active  { background: #ddf0dd; color: #1a5020; border: 1px solid #80c080; }
+.b-maintenance { background: #f5eccc; color: #6a4a00; border: 1px solid #d4b040; }
+.b-inactive { background: #e8e4de; color: #4a4030; border: 1px solid #b8a890; }
+.b-instagram { background: #f5e0ec; color: #701840; border: 1px solid #e0a0c0; }
+.b-wallapop  { background: #f0e4cc; color: #6b4015; border: 1px solid #d4b880; }
+.b-direct    { background: #ddf0dd; color: #1a5020; border: 1px solid #80c080; }
+.b-known     { background: #d8eaf5; color: #1a5070; border: 1px solid #90c0e0; }
+.b-search    { background: #ede4f5; color: #4a2070; border: 1px solid #c0a0e0; }
 
-/* STATS */
-.stat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; }
-.stat-val { font-size: 26px; font-weight: 300; color: var(--accent); font-family: 'DM Mono', monospace; }
-.stat-lbl { font-size: 11px; color: var(--text2); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+/* STAT CARDS */
+.stat-card {
+  background: var(--bark);
+  border-radius: var(--radius-lg);
+  padding: 22px 20px;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    85deg,
+    transparent,
+    transparent 18px,
+    rgba(255,255,255,0.02) 18px,
+    rgba(255,255,255,0.02) 19px
+  );
+}
+.stat-card .val {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  color: var(--sand2);
+  position: relative;
+}
+.stat-card .lbl {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--bark3);
+  margin-top: 6px;
+  position: relative;
+}
+.stat-card .icon {
+  position: absolute;
+  top: 16px; right: 18px;
+  font-size: 28px;
+  opacity: 0.15;
+}
 
 /* MISC */
-.empty { text-align: center; padding: 48px 20px; color: var(--text3); font-size: 13px; }
+.empty {
+  text-align: center;
+  padding: 56px 20px;
+  color: var(--text3);
+  font-size: 13px;
+  font-style: italic;
+  font-family: 'Playfair Display', serif;
+}
 .divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
-.img-thumb { width: 64px; height: 48px; object-fit: cover; border-radius: var(--radius); border: 1px solid var(--border); flex-shrink: 0; }
-.img-placeholder { width: 64px; height: 48px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--bg3); display: flex; align-items: center; justify-content: center; font-size: 9px; color: var(--text3); text-align: center; flex-shrink: 0; }
-.tab { display: none; }
-.tab.active { display: block; }
-.loading { text-align: center; padding: 40px; color: var(--text2); font-size: 13px; }
-.toast { position: fixed; bottom: 24px; right: 24px; background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--radius); padding: 12px 18px; font-size: 13px; color: var(--text); z-index: 999; opacity: 0; transform: translateY(8px); transition: all .25s; pointer-events: none; }
+.img-thumb {
+  width: 68px; height: 52px;
+  object-fit: cover;
+  border-radius: var(--radius);
+  border: 1px solid var(--border2);
+  flex-shrink: 0;
+}
+.img-placeholder {
+  width: 68px; height: 52px;
+  border-radius: var(--radius);
+  border: 1px dashed var(--border2);
+  background: var(--cream2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+  color: var(--text3);
+}
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--text3);
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+}
+.toast {
+  position: fixed;
+  bottom: 28px; right: 28px;
+  background: var(--bark);
+  color: var(--sand2);
+  border: 1px solid var(--bark3);
+  border-radius: var(--radius-lg);
+  padding: 14px 22px;
+  font-size: 13px;
+  z-index: 999;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all .3s;
+  pointer-events: none;
+  box-shadow: var(--shadow-lg);
+}
 .toast.show { opacity: 1; transform: translateY(0); }
-.toast.error { border-color: var(--red); color: #e74c3c; }
-.bar-row { margin-bottom: 10px; }
-.bar-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text2); margin-bottom: 4px; }
-.bar-track { height: 5px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
-.bar-fill { height: 100%; border-radius: 3px; background: var(--accent2); transition: width .4s; }
+.toast.error { background: #2a0e0e; color: #e08080; border-color: #5a2020; }
+
+.bar-row { margin-bottom: 12px; }
+.bar-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text2); margin-bottom: 5px; }
+.bar-track { height: 6px; background: var(--cream3); border-radius: 3px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 3px; background: var(--moss2); transition: width .5s ease; }
+
+.form-section { margin-bottom: 18px; }
+.gap-row { display: flex; gap: 10px; margin-top: 16px; }
+
+/* decorative ring on section title */
+.ring {
+  display: inline-block;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--sand);
+  margin-right: 10px;
+  vertical-align: middle;
+  position: relative;
+  top: -1px;
+}
 </style>
 </head>
 <body>
 <div class="app">
-  <header>
-    <div class="logo">⬡ laser<span>/quality</span></div>
-    <div><span class="status-dot" id="status-dot"></span><span class="status-label" id="status-label">Conectando...</span></div>
-  </header>
-  <nav>
-    <button class="active" onclick="showTab('dashboard',this)">Panel</button>
-    <button onclick="showTab('machines',this)">Máquinas</button>
-    <button onclick="showTab('materials',this)">Materiales</button>
-    <button onclick="showTab('tests',this)">Pruebas</button>
-    <button onclick="showTab('products',this)">Productos</button>
-    <button onclick="showTab('sales',this)">Ventas</button>
-  </nav>
-  <main>
 
-    <!-- DASHBOARD -->
-    <div id="tab-dashboard" class="tab active">
-      <div class="grid-4" id="dash-stats" style="margin-bottom:24px"></div>
-      <div class="grid-2">
-        <div>
-          <p class="section-title" style="margin-bottom:12px">Últimas ventas</p>
-          <div id="dash-sales"></div>
-        </div>
-        <div>
-          <p class="section-title" style="margin-bottom:12px">Procedencia de clientes</p>
-          <div id="dash-origins"></div>
-        </div>
+<header>
+  <div class="logo">
+    <span class="logo-leaf">🌿</span>
+    <span class="logo-name">EntreVetas</span>
+    <span class="logo-sub">Sistema de Calidad</span>
+  </div>
+  <div class="header-right">
+    <div class="status-pill">
+      <span class="dot" id="status-dot"></span>
+      <span id="status-label">Conectando...</span>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <button class="active" onclick="showTab('dashboard',this)">🌲 Panel</button>
+  <button onclick="showTab('machines',this)">⚙️ Máquinas</button>
+  <button onclick="showTab('materials',this)">🪵 Materiales</button>
+  <button onclick="showTab('tests',this)">🔬 Pruebas</button>
+  <button onclick="showTab('products',this)">📦 Productos</button>
+  <button onclick="showTab('sales',this)">🌿 Ventas</button>
+</nav>
+
+<main>
+
+<!-- DASHBOARD -->
+<div id="tab-dashboard" class="tab active">
+  <div class="section-header">
+    <h2 class="section-title"><span class="ring"></span>Resumen <em>del taller</em></h2>
+  </div>
+  <div class="grid-4" id="dash-stats" style="margin-bottom:28px"></div>
+  <div class="grid-2">
+    <div>
+      <p style="font-family:'Playfair Display',serif;font-size:16px;margin-bottom:14px;color:var(--bark)">Últimas ventas</p>
+      <div id="dash-sales"></div>
+    </div>
+    <div>
+      <p style="font-family:'Playfair Display',serif;font-size:16px;margin-bottom:14px;color:var(--bark)">Procedencia de clientes</p>
+      <div id="dash-origins"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MACHINES -->
+<div id="tab-machines" class="tab">
+  <div class="section-header">
+    <h2 class="section-title"><span class="ring"></span>Máquinas <em>registradas</em></h2>
+    <button class="btn btn-primary btn-sm" onclick="toggleForm('machine-form')">+ Añadir máquina</button>
+  </div>
+  <div id="machine-form" class="card" style="display:none;margin-bottom:24px">
+    <p style="font-family:'Playfair Display',serif;font-size:17px;margin-bottom:18px;color:var(--bark)">Nueva máquina</p>
+    <div class="grid-2 form-section">
+      <div class="field"><label>Nombre</label><input id="m-name" placeholder="Twotrees TTS-55 PRO"></div>
+      <div class="field"><label>Marca</label><input id="m-brand" placeholder="Twotrees"></div>
+    </div>
+    <div class="grid-3 form-section">
+      <div class="field"><label>Potencia máx (W)</label><input id="m-power" type="number" placeholder="55"></div>
+      <div class="field"><label>Área de trabajo</label><input id="m-area" placeholder="400×400mm"></div>
+      <div class="field"><label>Estado</label>
+        <select id="m-status"><option value="active">Activa</option><option value="maintenance">Mantenimiento</option><option value="inactive">Inactiva</option></select>
       </div>
     </div>
-
-    <!-- MACHINES -->
-    <div id="tab-machines" class="tab">
-      <div class="section-header">
-        <p class="section-title">Máquinas</p>
-        <button class="btn btn-primary btn-sm" onclick="toggleForm('machine-form')">+ Añadir</button>
-      </div>
-      <div id="machine-form" class="card" style="display:none;margin-bottom:20px">
-        <div class="grid-2" style="margin-bottom:14px">
-          <div class="field"><label>Nombre</label><input id="m-name" placeholder="Twotrees TTS-55 PRO"></div>
-          <div class="field"><label>Marca</label><input id="m-brand" placeholder="Twotrees"></div>
-        </div>
-        <div class="grid-3" style="margin-bottom:14px">
-          <div class="field"><label>Potencia máx (W)</label><input id="m-power" type="number" placeholder="55"></div>
-          <div class="field"><label>Área de trabajo</label><input id="m-area" placeholder="400x400mm"></div>
-          <div class="field"><label>Estado</label>
-            <select id="m-status"><option value="active">Activa</option><option value="maintenance">Mantenimiento</option><option value="inactive">Inactiva</option></select>
-          </div>
-        </div>
-        <div class="field" style="margin-bottom:14px"><label>Notas</label><textarea id="m-notes" placeholder="Notas, configuraciones..."></textarea></div>
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-primary" onclick="saveMachine()">Guardar</button>
-          <button class="btn" onclick="toggleForm('machine-form')">Cancelar</button>
-        </div>
-      </div>
-      <div id="machine-list"><div class="loading">Cargando...</div></div>
+    <div class="field form-section"><label>Notas</label><textarea id="m-notes" placeholder="Configuraciones, observaciones..."></textarea></div>
+    <div class="gap-row">
+      <button class="btn btn-primary" onclick="saveMachine()">Guardar máquina</button>
+      <button class="btn" onclick="toggleForm('machine-form')">Cancelar</button>
     </div>
+  </div>
+  <div id="machine-list"><div class="loading">Cargando máquinas...</div></div>
+</div>
 
-    <!-- MATERIALS -->
-    <div id="tab-materials" class="tab">
-      <div class="section-header">
-        <p class="section-title">Materiales</p>
-        <button class="btn btn-primary btn-sm" onclick="toggleForm('mat-form')">+ Añadir</button>
+<!-- MATERIALS -->
+<div id="tab-materials" class="tab">
+  <div class="section-header">
+    <h2 class="section-title"><span class="ring"></span>Materiales <em>del taller</em></h2>
+    <button class="btn btn-primary btn-sm" onclick="toggleForm('mat-form')">+ Añadir material</button>
+  </div>
+  <div id="mat-form" class="card" style="display:none;margin-bottom:24px">
+    <p style="font-family:'Playfair Display',serif;font-size:17px;margin-bottom:18px;color:var(--bark)">Nuevo material</p>
+    <div class="grid-2 form-section">
+      <div class="field"><label>Nombre del material</label><input id="mat-name" placeholder="DM 3mm natural reciclado"></div>
+      <div class="field"><label>Tipo</label>
+        <select id="mat-type"><option value="wood">Madera</option><option value="acrylic">Acrílico</option><option value="metal">Metal</option><option value="other">Otros</option></select>
       </div>
-      <div id="mat-form" class="card" style="display:none;margin-bottom:20px">
-        <div class="grid-2" style="margin-bottom:14px">
-          <div class="field"><label>Nombre</label><input id="mat-name" placeholder="DM 3mm natural"></div>
-          <div class="field"><label>Tipo</label>
-            <select id="mat-type"><option value="wood">Madera</option><option value="acrylic">Acrílico</option><option value="metal">Metal</option><option value="other">Otros</option></select>
-          </div>
-        </div>
-        <div class="grid-3" style="margin-bottom:14px">
-          <div class="field"><label>Grosor (mm)</label><input id="mat-thick" type="number" placeholder="3"></div>
-          <div class="field"><label>Marca / Proveedor</label><input id="mat-brand" placeholder="Leroy Merlin"></div>
-          <div class="field"><label>Medidas de venta</label><input id="mat-size" placeholder="600x400mm"></div>
-        </div>
-        <div class="grid-3" style="margin-bottom:14px">
-          <div class="field"><label>Precio por pieza (€)</label><input id="mat-price" type="number" step="0.01" placeholder="4.50" oninput="calcPpm2()"></div>
-          <div class="field"><label>Ancho (cm)</label><input id="mat-w" type="number" placeholder="60" oninput="calcPpm2()"></div>
-          <div class="field"><label>Alto (cm)</label><input id="mat-h" type="number" placeholder="40" oninput="calcPpm2()"></div>
-        </div>
-        <div class="grid-2" style="margin-bottom:14px">
-          <div class="field"><label>€ / m² (calculado)</label><div class="computed" id="mat-ppm2">—</div></div>
-          <div class="field"><label>Foto</label><input type="file" id="mat-photo" accept="image/*" onchange="previewImg('mat-photo','mat-photo-prev')"></div>
-        </div>
-        <div id="mat-photo-prev" style="margin-bottom:14px"></div>
-        <div class="field" style="margin-bottom:14px"><label>Notas</label><textarea id="mat-notes" placeholder="Color, acabado, observaciones..."></textarea></div>
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-primary" onclick="saveMaterial()">Guardar</button>
-          <button class="btn" onclick="toggleForm('mat-form')">Cancelar</button>
-        </div>
-      </div>
-      <div id="mat-list"><div class="loading">Cargando...</div></div>
     </div>
-
-    <!-- TESTS -->
-    <div id="tab-tests" class="tab">
-      <div class="section-header">
-        <p class="section-title">Pruebas de grabado y corte</p>
-        <button class="btn btn-primary btn-sm" onclick="toggleForm('test-form')">+ Nueva prueba</button>
-      </div>
-      <div id="test-form" class="card" style="display:none;margin-bottom:20px">
-        <div class="grid-2" style="margin-bottom:14px">
-          <div class="field"><label>Material</label><select id="t-mat"><option value="">Seleccionar...</option></select></div>
-          <div class="field"><label>Máquina</label><select id="t-machine"><option value="">Seleccionar...</option></select></div>
-        </div>
-        <div class="grid-2" style="margin-bottom:14px">
-          <div class="field"><label>Tipo</label>
-            <select id="t-type"><option value="engrave">Grabado</option><option value="cut">Corte</option></select>
-          </div>
-          <div class="field"><label>Nº pasadas</label><input id="t-passes" type="number" min="1" value="1"></div>
-        </div>
-        <div class="grid-2" style="margin-bottom:14px">
-          <div class="field"><label>Velocidad (mm/min)</label><input id="t-speed" type="number" placeholder="3000"></div>
-          <div class="field"><label>Potencia (%)</label><input id="t-power" type="number" min="0" max="100" placeholder="80"></div>
-        </div>
-        <div class="grid-2" style="margin-bottom:14px">
-          <div class="field"><label>Resultado</label>
-            <select id="t-result"><option value="ok">Correcto</option><option value="partial">Parcial</option><option value="fail">Fallido</option></select>
-          </div>
-          <div class="field"><label>Foto resultado</label><input type="file" id="t-photo" accept="image/*" onchange="previewImg('t-photo','t-photo-prev')"></div>
-        </div>
-        <div id="t-photo-prev" style="margin-bottom:14px"></div>
-        <div class="field" style="margin-bottom:14px"><label>Observaciones</label><textarea id="t-notes" placeholder="Calidad del corte, quemado, profundidad..."></textarea></div>
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-primary" onclick="saveTest()">Guardar</button>
-          <button class="btn" onclick="toggleForm('test-form')">Cancelar</button>
-        </div>
-      </div>
-      <div id="test-list"><div class="loading">Cargando...</div></div>
+    <div class="grid-3 form-section">
+      <div class="field"><label>Grosor (mm)</label><input id="mat-thick" type="number" placeholder="3"></div>
+      <div class="field"><label>Marca / Proveedor</label><input id="mat-brand" placeholder="Leroy Merlin"></div>
+      <div class="field"><label>Medidas de venta</label><input id="mat-size" placeholder="600×400mm"></div>
     </div>
-
-    <!-- PRODUCTS -->
-    <div id="tab-products" class="tab">
-      <div class="section-header">
-        <p class="section-title">Catálogo de productos</p>
-        <button class="btn btn-primary btn-sm" onclick="toggleForm('prod-form')">+ Nuevo producto</button>
-      </div>
-      <div id="prod-form" class="card" style="display:none;margin-bottom:20px">
-        <div class="grid-2" style="margin-bottom:14px">
-          <div class="field"><label>Nombre del producto</label><input id="p-name" placeholder="Caja personalizada DM"></div>
-          <div class="field"><label>Material principal</label><select id="p-mat" onchange="calcMatCost()"><option value="">Seleccionar...</option></select></div>
-        </div>
-        <div class="grid-3" style="margin-bottom:14px">
-          <div class="field"><label>Cantidad (cm²)</label><input id="p-qty" type="number" placeholder="600" oninput="calcMatCost()"></div>
-          <div class="field"><label>Coste material (€)</label><div class="computed" id="p-matcost">—</div></div>
-          <div class="field"><label>Precio sugerido (€)</label><div class="computed" id="p-suggested">—</div></div>
-        </div>
-        <div class="grid-2" style="margin-bottom:14px">
-          <div class="field"><label>Tiempo láser (min)</label><input id="p-ltime" type="number" placeholder="25"></div>
-          <div class="field"><label>Tiempo ensamblaje (min)</label><input id="p-atime" type="number" placeholder="10"></div>
-        </div>
-        <div class="grid-2" style="margin-bottom:14px">
-          <div class="field"><label>Descripción</label><textarea id="p-desc" placeholder="Medidas, personalización..."></textarea></div>
-          <div class="field"><label>Foto</label><input type="file" id="p-photo" accept="image/*" onchange="previewImg('p-photo','p-photo-prev')"></div>
-        </div>
-        <div id="p-photo-prev" style="margin-bottom:14px"></div>
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-primary" onclick="saveProduct()">Guardar</button>
-          <button class="btn" onclick="toggleForm('prod-form')">Cancelar</button>
-        </div>
-      </div>
-      <div id="prod-list"><div class="loading">Cargando...</div></div>
+    <div class="grid-3 form-section">
+      <div class="field"><label>Precio por pieza (€)</label><input id="mat-price" type="number" step="0.01" placeholder="4.50" oninput="calcPpm2()"></div>
+      <div class="field"><label>Ancho (cm)</label><input id="mat-w" type="number" placeholder="60" oninput="calcPpm2()"></div>
+      <div class="field"><label>Alto (cm)</label><input id="mat-h" type="number" placeholder="40" oninput="calcPpm2()"></div>
     </div>
-
-    <!-- SALES -->
-    <div id="tab-sales" class="tab">
-      <div class="section-header">
-        <p class="section-title">Ventas</p>
-        <button class="btn btn-primary btn-sm" onclick="toggleForm('sale-form')">+ Nueva venta</button>
-      </div>
-      <div id="sale-form" class="card" style="display:none;margin-bottom:20px">
-        <div class="grid-2" style="margin-bottom:14px">
-          <div class="field"><label>Cliente</label><input id="s-client" placeholder="Nombre o referencia"></div>
-          <div class="field"><label>Producto</label><select id="s-prod"><option value="">Seleccionar...</option></select></div>
-        </div>
-        <div class="grid-3" style="margin-bottom:14px">
-          <div class="field"><label>Fecha solicitud</label><input id="s-rdate" type="date"></div>
-          <div class="field"><label>Fecha entrega</label><input id="s-ddate" type="date" oninput="calcDays()"></div>
-          <div class="field"><label>Días transcurridos</label><div class="computed" id="s-days">—</div></div>
-        </div>
-        <div class="grid-2" style="margin-bottom:14px">
-          <div class="field"><label>Importe cobrado (€)</label><input id="s-amount" type="number" step="0.01" placeholder="35.00"></div>
-          <div class="field"><label>Procedencia</label>
-            <select id="s-origin">
-              <option value="instagram">Instagram</option>
-              <option value="wallapop">Wallapop</option>
-              <option value="direct">Venta directa</option>
-              <option value="known">Conocido</option>
-              <option value="search">Venta buscada</option>
-            </select>
-          </div>
-        </div>
-        <div class="field" style="margin-bottom:14px"><label>Notas</label><textarea id="s-notes" placeholder="Personalización, observaciones..."></textarea></div>
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-primary" onclick="saveSale()">Guardar</button>
-          <button class="btn" onclick="toggleForm('sale-form')">Cancelar</button>
-        </div>
-      </div>
-      <div id="sale-list"><div class="loading">Cargando...</div></div>
+    <div class="grid-2 form-section">
+      <div class="field"><label>€ / m² (calculado)</label><div class="computed" id="mat-ppm2">—</div></div>
+      <div class="field"><label>Fotografía del material</label><input type="file" id="mat-photo" accept="image/*" onchange="previewImg('mat-photo','mat-photo-prev')"></div>
     </div>
+    <div id="mat-photo-prev" style="margin-bottom:16px"></div>
+    <div class="field form-section"><label>Notas</label><textarea id="mat-notes" placeholder="Color, acabado, origen, si es reciclado..."></textarea></div>
+    <div class="gap-row">
+      <button class="btn btn-primary" onclick="saveMaterial()">Guardar material</button>
+      <button class="btn" onclick="toggleForm('mat-form')">Cancelar</button>
+    </div>
+  </div>
+  <div id="mat-list"><div class="loading">Cargando materiales...</div></div>
+</div>
 
-  </main>
+<!-- TESTS -->
+<div id="tab-tests" class="tab">
+  <div class="section-header">
+    <h2 class="section-title"><span class="ring"></span>Pruebas <em>de grabado y corte</em></h2>
+    <button class="btn btn-primary btn-sm" onclick="toggleForm('test-form')">+ Nueva prueba</button>
+  </div>
+  <div id="test-form" class="card" style="display:none;margin-bottom:24px">
+    <p style="font-family:'Playfair Display',serif;font-size:17px;margin-bottom:18px;color:var(--bark)">Registrar prueba</p>
+    <div class="grid-2 form-section">
+      <div class="field"><label>Material</label><select id="t-mat"><option value="">Seleccionar...</option></select></div>
+      <div class="field"><label>Máquina</label><select id="t-machine"><option value="">Seleccionar...</option></select></div>
+    </div>
+    <div class="grid-2 form-section">
+      <div class="field"><label>Tipo de prueba</label>
+        <select id="t-type"><option value="engrave">Grabado</option><option value="cut">Corte</option></select>
+      </div>
+      <div class="field"><label>Nº de pasadas</label><input id="t-passes" type="number" min="1" value="1"></div>
+    </div>
+    <div class="grid-2 form-section">
+      <div class="field"><label>Velocidad (mm/min)</label><input id="t-speed" type="number" placeholder="3000"></div>
+      <div class="field"><label>Potencia (%)</label><input id="t-power" type="number" min="0" max="100" placeholder="80"></div>
+    </div>
+    <div class="grid-2 form-section">
+      <div class="field"><label>Resultado</label>
+        <select id="t-result"><option value="ok">Correcto ✓</option><option value="partial">Parcial</option><option value="fail">Fallido ✗</option></select>
+      </div>
+      <div class="field"><label>Fotografía del resultado</label><input type="file" id="t-photo" accept="image/*" onchange="previewImg('t-photo','t-photo-prev')"></div>
+    </div>
+    <div id="t-photo-prev" style="margin-bottom:16px"></div>
+    <div class="field form-section"><label>Observaciones</label><textarea id="t-notes" placeholder="Calidad del corte, quemado, profundidad de grabado..."></textarea></div>
+    <div class="gap-row">
+      <button class="btn btn-primary" onclick="saveTest()">Guardar prueba</button>
+      <button class="btn" onclick="toggleForm('test-form')">Cancelar</button>
+    </div>
+  </div>
+  <div id="test-list"><div class="loading">Cargando pruebas...</div></div>
+</div>
+
+<!-- PRODUCTS -->
+<div id="tab-products" class="tab">
+  <div class="section-header">
+    <h2 class="section-title"><span class="ring"></span>Catálogo <em>de productos</em></h2>
+    <button class="btn btn-primary btn-sm" onclick="toggleForm('prod-form')">+ Nuevo producto</button>
+  </div>
+  <div id="prod-form" class="card" style="display:none;margin-bottom:24px">
+    <p style="font-family:'Playfair Display',serif;font-size:17px;margin-bottom:18px;color:var(--bark)">Nuevo producto</p>
+    <div class="grid-2 form-section">
+      <div class="field"><label>Nombre del producto</label><input id="p-name" placeholder="Caja personalizada DM reciclado"></div>
+      <div class="field"><label>Material principal</label><select id="p-mat" onchange="calcMatCost()"><option value="">Seleccionar...</option></select></div>
+    </div>
+    <div class="grid-3 form-section">
+      <div class="field"><label>Cantidad material (cm²)</label><input id="p-qty" type="number" placeholder="600" oninput="calcMatCost()"></div>
+      <div class="field"><label>Coste de material (€)</label><div class="computed" id="p-matcost">—</div></div>
+      <div class="field"><label>Precio sugerido (€)</label><div class="computed" id="p-suggested">—</div></div>
+    </div>
+    <div class="grid-2 form-section">
+      <div class="field"><label>Tiempo láser (min)</label><input id="p-ltime" type="number" placeholder="25"></div>
+      <div class="field"><label>Tiempo ensamblaje (min)</label><input id="p-atime" type="number" placeholder="10"></div>
+    </div>
+    <div class="grid-2 form-section">
+      <div class="field"><label>Descripción</label><textarea id="p-desc" placeholder="Medidas finales, personalización disponible, proceso de creación..."></textarea></div>
+      <div class="field"><label>Fotografía del producto</label><input type="file" id="p-photo" accept="image/*" onchange="previewImg('p-photo','p-photo-prev')"></div>
+    </div>
+    <div id="p-photo-prev" style="margin-bottom:16px"></div>
+    <div class="gap-row">
+      <button class="btn btn-primary" onclick="saveProduct()">Guardar producto</button>
+      <button class="btn" onclick="toggleForm('prod-form')">Cancelar</button>
+    </div>
+  </div>
+  <div id="prod-list"><div class="loading">Cargando productos...</div></div>
+</div>
+
+<!-- SALES -->
+<div id="tab-sales" class="tab">
+  <div class="section-header">
+    <h2 class="section-title"><span class="ring"></span>Registro <em>de ventas</em></h2>
+    <button class="btn btn-primary btn-sm" onclick="toggleForm('sale-form')">+ Nueva venta</button>
+  </div>
+  <div id="sale-form" class="card" style="display:none;margin-bottom:24px">
+    <p style="font-family:'Playfair Display',serif;font-size:17px;margin-bottom:18px;color:var(--bark)">Nueva venta</p>
+    <div class="grid-2 form-section">
+      <div class="field"><label>Cliente</label><input id="s-client" placeholder="Nombre o referencia del cliente"></div>
+      <div class="field"><label>Producto vendido</label><select id="s-prod"><option value="">Seleccionar...</option></select></div>
+    </div>
+    <div class="grid-3 form-section">
+      <div class="field"><label>Fecha de solicitud</label><input id="s-rdate" type="date"></div>
+      <div class="field"><label>Fecha de entrega</label><input id="s-ddate" type="date" oninput="calcDays()"></div>
+      <div class="field"><label>Días transcurridos</label><div class="computed" id="s-days">—</div></div>
+    </div>
+    <div class="grid-2 form-section">
+      <div class="field"><label>Importe cobrado (€)</label><input id="s-amount" type="number" step="0.01" placeholder="35.00"></div>
+      <div class="field"><label>Procedencia del cliente</label>
+        <select id="s-origin">
+          <option value="instagram">Instagram</option>
+          <option value="wallapop">Wallapop</option>
+          <option value="direct">Venta directa</option>
+          <option value="known">Conocido</option>
+          <option value="search">Venta buscada</option>
+        </select>
+      </div>
+    </div>
+    <div class="field form-section"><label>Notas</label><textarea id="s-notes" placeholder="Personalización solicitada, observaciones..."></textarea></div>
+    <div class="gap-row">
+      <button class="btn btn-primary" onclick="saveSale()">Guardar venta</button>
+      <button class="btn" onclick="toggleForm('sale-form')">Cancelar</button>
+    </div>
+  </div>
+  <div id="sale-list"><div class="loading">Cargando ventas...</div></div>
+</div>
+
+</main>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -347,14 +681,12 @@ main { flex: 1; padding: 28px 24px; max-width: 960px; margin: 0 auto; width: 100
 const SUPABASE_URL = 'https://tfcwlnnbhhowfngbkqhp.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_U4wLe-WNS-ItfWf7nmbjfg_Zh18SStZ';
 
-// Cache local
 var cache = { machines:[], materials:[], products:[], tests:[], sales:[] };
 
-// --- API ---
-async function api(table, method, body, id) {
+async function sbFetch(table, method, body, filter) {
   var url = SUPABASE_URL + '/rest/v1/' + table;
-  if (id) url += '?id=eq.' + id;
-  if (method === 'GET') url += (id ? '&' : '?') + 'order=created_at.desc';
+  if (filter) url += '?' + filter;
+  else if (method === 'GET') url += '?order=created_at.desc';
   var opts = {
     method: method,
     headers: {
@@ -366,62 +698,49 @@ async function api(table, method, body, id) {
   };
   if (body) opts.body = JSON.stringify(body);
   var res = await fetch(url, opts);
-  if (!res.ok) { var err = await res.text(); throw new Error(err); }
-  if (method === 'DELETE') return;
+  if (!res.ok) throw new Error(await res.text());
   var text = await res.text();
   return text ? JSON.parse(text) : [];
 }
 
 async function getAll(table) {
-  var url = SUPABASE_URL + '/rest/v1/' + table + '?order=created_at.desc';
-  var res = await fetch(url, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } });
-  if (!res.ok) throw new Error(await res.text());
-  return await res.json();
+  return sbFetch(table, 'GET', null, 'order=created_at.desc');
 }
-
 async function del(table, id) {
-  var url = SUPABASE_URL + '/rest/v1/' + table + '?id=eq.' + id;
-  await fetch(url, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } });
+  return sbFetch(table, 'DELETE', null, 'id=eq.' + id);
 }
 
-// --- TOAST ---
 function toast(msg, isError) {
   var el = document.getElementById('toast');
   el.textContent = msg;
   el.className = 'toast show' + (isError ? ' error' : '');
-  setTimeout(function() { el.className = 'toast'; }, 2800);
+  setTimeout(function(){ el.className = 'toast'; }, 2800);
 }
 
-// --- STATUS ---
 async function checkStatus() {
   try {
     await getAll('machines');
-    document.getElementById('status-dot').className = 'status-dot';
+    document.getElementById('status-dot').className = 'dot';
     document.getElementById('status-label').textContent = 'Conectado';
   } catch(e) {
-    document.getElementById('status-dot').className = 'status-dot offline';
+    document.getElementById('status-dot').className = 'dot offline';
     document.getElementById('status-label').textContent = 'Sin conexión';
   }
 }
 
-// --- TAB ---
 function showTab(name, btn) {
   document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
   document.querySelectorAll('nav button').forEach(function(b){ b.classList.remove('active'); });
   document.getElementById('tab-' + name).classList.add('active');
   btn.classList.add('active');
-  if (name === 'dashboard') renderDash();
-  if (name === 'machines') loadMachines();
-  if (name === 'materials') loadMaterials();
-  if (name === 'tests') loadTests();
-  if (name === 'products') loadProducts();
-  if (name === 'sales') loadSales();
+  var loaders = { dashboard: renderDash, machines: loadMachines, materials: loadMaterials, tests: loadTests, products: loadProducts, sales: loadSales };
+  if (loaders[name]) loaders[name]();
 }
 
 function toggleForm(id) {
   var el = document.getElementById(id);
   el.style.display = el.style.display === 'none' ? 'block' : 'none';
-  if (id === 'test-form') populateSel('t-mat', cache.materials, 'name'), populateSel('t-machine', cache.machines, 'name');
+  if (id === 'test-form') { populateSel('t-mat', cache.materials, 'name'); populateSel('t-machine', cache.machines, 'name'); }
   if (id === 'prod-form') populateSel('p-mat', cache.materials, 'name');
   if (id === 'sale-form') { populateSel('s-prod', cache.products, 'name'); document.getElementById('s-rdate').value = new Date().toISOString().split('T')[0]; }
 }
@@ -430,119 +749,100 @@ function populateSel(id, arr, field) {
   var s = document.getElementById(id);
   var cur = s.value;
   s.innerHTML = '<option value="">Seleccionar...</option>';
-  arr.forEach(function(item) { s.innerHTML += '<option value="' + item.id + '">' + item[field] + '</option>'; });
+  arr.forEach(function(item){ s.innerHTML += '<option value="' + item.id + '">' + item[field] + '</option>'; });
   if (cur) s.value = cur;
 }
 
-// --- IMG ---
 function previewImg(inputId, prevId) {
   var f = document.getElementById(inputId).files[0];
   var p = document.getElementById(prevId);
   if (!f) { p.innerHTML = ''; return; }
   var r = new FileReader();
-  r.onload = function(e) { p.innerHTML = '<img src="' + e.target.result + '" style="max-height:120px;border-radius:8px;border:1px solid #2e2e2e">'; };
+  r.onload = function(e){ p.innerHTML = '<img src="' + e.target.result + '" style="max-height:130px;border-radius:10px;border:1px solid var(--border2)">'; };
   r.readAsDataURL(f);
 }
 
 function getImgData(inputId) {
   var inp = document.getElementById(inputId);
-  if (!inp.files || !inp.files[0]) return null;
-  return new Promise(function(res) {
-    var r = new FileReader();
-    r.onload = function(e) { res(e.target.result); };
-    r.readAsDataURL(inp.files[0]);
-  });
+  if (!inp.files || !inp.files[0]) return Promise.resolve(null);
+  return new Promise(function(res){ var r = new FileReader(); r.onload = function(e){ res(e.target.result); }; r.readAsDataURL(inp.files[0]); });
 }
 
-function clearForm(ids) {
-  ids.forEach(function(id) {
-    var el = document.getElementById(id);
-    if (el) el.value = '';
-  });
-}
+function clearFields(ids) { ids.forEach(function(id){ var el = document.getElementById(id); if(el) el.value = ''; }); }
 
-// --- BADGES ---
 function typeBadge(t) {
   var map = { wood:'b-wood', acrylic:'b-acrylic', metal:'b-metal', other:'b-other' };
-  var lbl = { wood:'Madera', acrylic:'Acrílico', metal:'Metal', other:'Otros' };
-  return '<span class="badge ' + (map[t]||'b-metal') + '">' + (lbl[t]||t) + '</span>';
+  var lbl = { wood:'🪵 Madera', acrylic:'🔷 Acrílico', metal:'⚙️ Metal', other:'♻️ Otros' };
+  return '<span class="badge ' + (map[t]||'b-other') + '">' + (lbl[t]||t) + '</span>';
 }
 function statusBadge(s) {
-  var lbl = { active:'Activa', maintenance:'Mantenimiento', inactive:'Inactiva' };
-  return '<span class="badge b-' + s + '">' + (lbl[s]||s) + '</span>';
+  var lbl = { active:'● Activa', maintenance:'◐ Mantenimiento', inactive:'○ Inactiva' };
+  return '<span class="badge b-' + (s||'active') + '">' + (lbl[s]||s) + '</span>';
 }
 function resultBadge(r) {
-  var lbl = { ok:'Correcto', partial:'Parcial', fail:'Fallido' };
-  return '<span class="badge b-' + r + '">' + (lbl[r]||r) + '</span>';
+  var lbl = { ok:'✓ Correcto', partial:'◐ Parcial', fail:'✗ Fallido' };
+  return '<span class="badge b-' + (r||'ok') + '">' + (lbl[r]||r) + '</span>';
 }
 function originBadge(o) {
-  var lbl = { instagram:'Instagram', wallapop:'Wallapop', direct:'Venta directa', known:'Conocido', search:'Buscada' };
-  return '<span class="badge b-' + o + '">' + (lbl[o]||o) + '</span>';
+  var lbl = { instagram:'📷 Instagram', wallapop:'🏷️ Wallapop', direct:'🤝 Directa', known:'👥 Conocido', search:'🔍 Buscada' };
+  return '<span class="badge b-' + (o||'direct') + '">' + (lbl[o]||o) + '</span>';
 }
 function imgOrPlaceholder(photo) {
-  return photo
-    ? '<img class="img-thumb" src="' + photo + '">'
-    : '<div class="img-placeholder">Sin<br>foto</div>';
+  return photo ? '<img class="img-thumb" src="' + photo + '">' : '<div class="img-placeholder">🌿</div>';
 }
 
-// --- MACHINES ---
+// MACHINES
 async function loadMachines() {
-  try {
-    cache.machines = await getAll('machines');
-    renderMachines();
-  } catch(e) { toast('Error cargando máquinas', true); }
+  try { cache.machines = await getAll('machines'); renderMachines(); }
+  catch(e) { toast('Error cargando máquinas', true); }
 }
 function renderMachines() {
   var el = document.getElementById('machine-list');
-  if (!cache.machines.length) { el.innerHTML = '<div class="empty">Sin máquinas. Añade tu primera máquina.</div>'; return; }
-  el.innerHTML = cache.machines.map(function(m) {
+  if (!cache.machines.length) { el.innerHTML = '<div class="empty">Aún no hay máquinas registradas.<br>Añade tu primera máquina para comenzar.</div>'; return; }
+  el.innerHTML = cache.machines.map(function(m){
     return '<div class="list-item">' +
-      '<div class="info"><p class="item-name">' + m.name + '</p><p class="item-meta">' + (m.brand||'') + ' · ' + (m.power||'—') + 'W · ' + (m.area||'—') + '</p></div>' +
-      statusBadge(m.status||'active') +
+      '<div class="img-placeholder" style="font-size:22px">⚙️</div>' +
+      '<div class="info"><p class="item-name">' + m.name + '</p><p class="item-meta">' + (m.brand||'') + ' · ' + (m.power||'—') + ' W · ' + (m.area||'—') + '</p></div>' +
+      statusBadge(m.status) +
       '<div class="row-actions"><button class="btn btn-sm btn-danger" onclick="deleteMachine(' + m.id + ')">Eliminar</button></div>' +
       '</div>';
   }).join('');
 }
 async function saveMachine() {
   var name = document.getElementById('m-name').value.trim();
-  if (!name) { toast('Introduce el nombre', true); return; }
+  if (!name) { toast('Introduce el nombre de la máquina', true); return; }
   try {
-    await api('machines', 'POST', { name:name, brand:document.getElementById('m-brand').value, power:document.getElementById('m-power').value, area:document.getElementById('m-area').value, status:document.getElementById('m-status').value, notes:document.getElementById('m-notes').value });
-    clearForm(['m-name','m-brand','m-power','m-area','m-notes']);
+    await sbFetch('machines', 'POST', { name, brand: document.getElementById('m-brand').value, power: document.getElementById('m-power').value, area: document.getElementById('m-area').value, status: document.getElementById('m-status').value, notes: document.getElementById('m-notes').value });
+    clearFields(['m-name','m-brand','m-power','m-area','m-notes']);
     toggleForm('machine-form');
     await loadMachines();
-    toast('Máquina guardada');
+    toast('✓ Máquina guardada');
   } catch(e) { toast('Error al guardar', true); }
 }
 async function deleteMachine(id) {
-  if (!confirm('¿Eliminar máquina?')) return;
-  await del('machines', id);
-  await loadMachines();
-  toast('Eliminada');
+  if (!confirm('¿Eliminar esta máquina?')) return;
+  await del('machines', id); await loadMachines(); toast('Máquina eliminada');
 }
 
-// --- MATERIALS ---
+// MATERIALS
 function calcPpm2() {
   var price = parseFloat(document.getElementById('mat-price').value)||0;
   var w = parseFloat(document.getElementById('mat-w').value)||0;
   var h = parseFloat(document.getElementById('mat-h').value)||0;
   var el = document.getElementById('mat-ppm2');
-  if (price && w && h) { el.textContent = (price / ((w*h)/10000)).toFixed(2) + ' €/m²'; }
-  else el.textContent = '—';
+  el.textContent = (price && w && h) ? (price / ((w*h)/10000)).toFixed(2) + ' €/m²' : '—';
 }
 async function loadMaterials() {
-  try {
-    cache.materials = await getAll('materials');
-    renderMaterials();
-  } catch(e) { toast('Error cargando materiales', true); }
+  try { cache.materials = await getAll('materials'); renderMaterials(); }
+  catch(e) { toast('Error cargando materiales', true); }
 }
 function renderMaterials() {
   var el = document.getElementById('mat-list');
-  if (!cache.materials.length) { el.innerHTML = '<div class="empty">Sin materiales registrados.</div>'; return; }
-  el.innerHTML = cache.materials.map(function(m) {
+  if (!cache.materials.length) { el.innerHTML = '<div class="empty">Sin materiales registrados.<br>Añade tus primeros materiales de trabajo.</div>'; return; }
+  el.innerHTML = cache.materials.map(function(m){
     return '<div class="list-item">' +
       imgOrPlaceholder(m.photo) +
-      '<div class="info"><p class="item-name">' + m.name + '</p><p class="item-meta">' + (m.brand||'') + ' · ' + (m.thick||'—') + 'mm · ' + (m.size||'—') + (m.ppm2 ? ' · ' + m.ppm2 + ' €/m²' : '') + '</p></div>' +
+      '<div class="info"><p class="item-name">' + m.name + '</p><p class="item-meta">' + (m.brand||'') + ' · ' + (m.thick||'—') + 'mm · ' + (m.size||'—') + (m.ppm2 ? ' · <strong>' + m.ppm2 + ' €/m²</strong>' : '') + '</p></div>' +
       typeBadge(m.type) +
       '<div class="row-actions"><button class="btn btn-sm btn-danger" onclick="deleteMaterial(' + m.id + ')">Eliminar</button></div>' +
       '</div>';
@@ -550,51 +850,47 @@ function renderMaterials() {
 }
 async function saveMaterial() {
   var name = document.getElementById('mat-name').value.trim();
-  if (!name) { toast('Introduce el nombre', true); return; }
+  if (!name) { toast('Introduce el nombre del material', true); return; }
   var price = parseFloat(document.getElementById('mat-price').value)||0;
   var w = parseFloat(document.getElementById('mat-w').value)||0;
   var h = parseFloat(document.getElementById('mat-h').value)||0;
   var ppm2 = (price && w && h) ? (price / ((w*h)/10000)).toFixed(2) : null;
   var photo = await getImgData('mat-photo');
   try {
-    await api('materials', 'POST', { name:name, type:document.getElementById('mat-type').value, thick:document.getElementById('mat-thick').value, brand:document.getElementById('mat-brand').value, size:document.getElementById('mat-size').value, price:price, w:w, h:h, ppm2:ppm2, photo:photo, notes:document.getElementById('mat-notes').value });
-    clearForm(['mat-name','mat-thick','mat-brand','mat-size','mat-price','mat-w','mat-h','mat-notes']);
+    await sbFetch('materials', 'POST', { name, type: document.getElementById('mat-type').value, thick: document.getElementById('mat-thick').value, brand: document.getElementById('mat-brand').value, size: document.getElementById('mat-size').value, price, w, h, ppm2, photo, notes: document.getElementById('mat-notes').value });
+    clearFields(['mat-name','mat-thick','mat-brand','mat-size','mat-price','mat-w','mat-h','mat-notes']);
     document.getElementById('mat-photo').value = '';
     document.getElementById('mat-photo-prev').innerHTML = '';
     document.getElementById('mat-ppm2').textContent = '—';
     toggleForm('mat-form');
     await loadMaterials();
-    toast('Material guardado');
-  } catch(e) { toast('Error al guardar', true); }
+    toast('✓ Material guardado');
+  } catch(e) { toast('Error al guardar: ' + e.message, true); }
 }
 async function deleteMaterial(id) {
-  if (!confirm('¿Eliminar material?')) return;
-  await del('materials', id);
-  await loadMaterials();
-  toast('Eliminado');
+  if (!confirm('¿Eliminar este material?')) return;
+  await del('materials', id); await loadMaterials(); toast('Material eliminado');
 }
 
-// --- TESTS ---
+// TESTS
 async function loadTests() {
   try {
-    cache.tests = await getAll('tests');
-    await loadMachines();
-    await loadMaterials();
+    [cache.tests, cache.materials, cache.machines] = await Promise.all([getAll('tests'), getAll('materials'), getAll('machines')]);
     renderTests();
   } catch(e) { toast('Error cargando pruebas', true); }
 }
 function renderTests() {
   var el = document.getElementById('test-list');
-  if (!cache.tests.length) { el.innerHTML = '<div class="empty">Sin pruebas registradas.</div>'; return; }
-  el.innerHTML = cache.tests.map(function(t) {
+  if (!cache.tests.length) { el.innerHTML = '<div class="empty">Sin pruebas registradas.<br>Comienza documentando tus primeros parámetros.</div>'; return; }
+  el.innerHTML = cache.tests.map(function(t){
     var mat = cache.materials.find(function(m){ return m.id == t.mat_id; });
     var machine = cache.machines.find(function(m){ return m.id == t.machine_id; });
-    var typeBadgeHtml = t.type === 'engrave' ? '<span class="badge b-engrave">Grabado</span>' : '<span class="badge b-cut">Corte</span>';
+    var tb = t.type === 'engrave' ? '<span class="badge b-engrave">✦ Grabado</span>' : '<span class="badge b-cut">✂ Corte</span>';
     return '<div class="list-item">' +
       imgOrPlaceholder(t.photo) +
-      '<div class="info"><p class="item-name">' + (mat?mat.name:'—') + ' <span style="margin-left:6px">' + typeBadgeHtml + '</span></p>' +
+      '<div class="info"><p class="item-name">' + (mat?mat.name:'—') + ' &nbsp;' + tb + '</p>' +
       '<p class="item-meta">' + (machine?machine.name:'—') + ' · ' + (t.speed||'—') + ' mm/min · ' + (t.power||'—') + '% · ' + (t.passes||1) + ' pas.</p></div>' +
-      resultBadge(t.result||'ok') +
+      resultBadge(t.result) +
       '<div class="row-actions"><button class="btn btn-sm btn-danger" onclick="deleteTest(' + t.id + ')">Eliminar</button></div>' +
       '</div>';
   }).join('');
@@ -604,23 +900,21 @@ async function saveTest() {
   if (!matId) { toast('Selecciona un material', true); return; }
   var photo = await getImgData('t-photo');
   try {
-    await api('tests', 'POST', { mat_id:parseInt(matId), machine_id:parseInt(document.getElementById('t-machine').value)||null, type:document.getElementById('t-type').value, passes:document.getElementById('t-passes').value, speed:document.getElementById('t-speed').value, power:document.getElementById('t-power').value, result:document.getElementById('t-result').value, photo:photo, notes:document.getElementById('t-notes').value });
-    clearForm(['t-speed','t-power','t-passes','t-notes']);
+    await sbFetch('tests', 'POST', { mat_id: parseInt(matId), machine_id: parseInt(document.getElementById('t-machine').value)||null, type: document.getElementById('t-type').value, passes: document.getElementById('t-passes').value, speed: document.getElementById('t-speed').value, power: document.getElementById('t-power').value, result: document.getElementById('t-result').value, photo, notes: document.getElementById('t-notes').value });
+    clearFields(['t-speed','t-power','t-passes','t-notes']);
     document.getElementById('t-photo').value = '';
     document.getElementById('t-photo-prev').innerHTML = '';
     toggleForm('test-form');
     await loadTests();
-    toast('Prueba guardada');
+    toast('✓ Prueba guardada');
   } catch(e) { toast('Error al guardar', true); }
 }
 async function deleteTest(id) {
-  if (!confirm('¿Eliminar prueba?')) return;
-  await del('tests', id);
-  await loadTests();
-  toast('Eliminada');
+  if (!confirm('¿Eliminar esta prueba?')) return;
+  await del('tests', id); await loadTests(); toast('Prueba eliminada');
 }
 
-// --- PRODUCTS ---
+// PRODUCTS
 function calcMatCost() {
   var matId = document.getElementById('p-mat').value;
   var qty = parseFloat(document.getElementById('p-qty').value)||0;
@@ -635,74 +929,71 @@ function calcMatCost() {
 }
 async function loadProducts() {
   try {
-    cache.products = await getAll('products');
-    if (!cache.materials.length) cache.materials = await getAll('materials');
+    [cache.products, cache.materials] = await Promise.all([getAll('products'), getAll('materials')]);
     renderProducts();
   } catch(e) { toast('Error cargando productos', true); }
 }
 function renderProducts() {
   var el = document.getElementById('prod-list');
-  if (!cache.products.length) { el.innerHTML = '<div class="empty">Sin productos registrados.</div>'; return; }
-  el.innerHTML = cache.products.map(function(p) {
+  if (!cache.products.length) { el.innerHTML = '<div class="empty">Sin productos en el catálogo.<br>Documenta tus creaciones para calcular costes.</div>'; return; }
+  el.innerHTML = cache.products.map(function(p){
     var mat = cache.materials.find(function(m){ return m.id == p.mat_id; });
     return '<div class="list-item">' +
       imgOrPlaceholder(p.photo) +
       '<div class="info"><p class="item-name">' + p.name + '</p>' +
-      '<p class="item-meta">' + (mat?mat.name:'—') + ' · Láser: ' + (p.laser_time||'—') + ' min · Ensamblaje: ' + (p.assembly_time||'—') + ' min' + (p.mat_cost ? ' · Mat: ' + p.mat_cost + ' €' : '') + '</p></div>' +
+      '<p class="item-meta">' + (mat?mat.name:'—') + ' · ⏱ Láser: ' + (p.laser_time||'—') + ' min · Ensamblaje: ' + (p.assembly_time||'—') + ' min' + (p.mat_cost ? ' · Mat: <strong>' + p.mat_cost + ' €</strong>' : '') + '</p></div>' +
       '<div class="row-actions"><button class="btn btn-sm btn-danger" onclick="deleteProduct(' + p.id + ')">Eliminar</button></div>' +
       '</div>';
   }).join('');
 }
 async function saveProduct() {
   var name = document.getElementById('p-name').value.trim();
-  if (!name) { toast('Introduce el nombre', true); return; }
+  if (!name) { toast('Introduce el nombre del producto', true); return; }
   var matId = document.getElementById('p-mat').value;
   var qty = parseFloat(document.getElementById('p-qty').value)||0;
   var mat = cache.materials.find(function(m){ return m.id == matId; });
   var matCost = (mat && mat.ppm2 && qty) ? (parseFloat(mat.ppm2) * qty / 10000).toFixed(2) : null;
   var photo = await getImgData('p-photo');
   try {
-    await api('products', 'POST', { name:name, mat_id:matId?parseInt(matId):null, qty:qty, mat_cost:matCost, laser_time:document.getElementById('p-ltime').value, assembly_time:document.getElementById('p-atime').value, description:document.getElementById('p-desc').value, photo:photo });
-    clearForm(['p-name','p-qty','p-ltime','p-atime','p-desc']);
+    await sbFetch('products', 'POST', { name, mat_id: matId ? parseInt(matId) : null, qty, mat_cost: matCost, laser_time: document.getElementById('p-ltime').value, assembly_time: document.getElementById('p-atime').value, description: document.getElementById('p-desc').value, photo });
+    clearFields(['p-name','p-qty','p-ltime','p-atime','p-desc']);
     document.getElementById('p-photo').value = '';
     document.getElementById('p-photo-prev').innerHTML = '';
     document.getElementById('p-matcost').textContent = '—';
     document.getElementById('p-suggested').textContent = '—';
     toggleForm('prod-form');
     await loadProducts();
-    toast('Producto guardado');
+    toast('✓ Producto guardado');
   } catch(e) { toast('Error al guardar', true); }
 }
 async function deleteProduct(id) {
-  if (!confirm('¿Eliminar producto?')) return;
-  await del('products', id);
-  await loadProducts();
-  toast('Eliminado');
+  if (!confirm('¿Eliminar este producto?')) return;
+  await del('products', id); await loadProducts(); toast('Producto eliminado');
 }
 
-// --- SALES ---
+// SALES
 function calcDays() {
   var r = document.getElementById('s-rdate').value;
   var d = document.getElementById('s-ddate').value;
   var el = document.getElementById('s-days');
-  if (r && d) { var diff = Math.round((new Date(d) - new Date(r)) / 86400000); el.textContent = diff >= 0 ? diff + ' días' : 'Inválido'; }
+  if (r && d) { var diff = Math.round((new Date(d) - new Date(r)) / 86400000); el.textContent = diff >= 0 ? diff + ' días' : 'Fecha inválida'; }
   else el.textContent = '—';
 }
 async function loadSales() {
   try {
-    cache.sales = await getAll('sales');
-    if (!cache.products.length) cache.products = await getAll('products');
+    [cache.sales, cache.products] = await Promise.all([getAll('sales'), getAll('products')]);
     renderSales();
   } catch(e) { toast('Error cargando ventas', true); }
 }
 function renderSales() {
   var el = document.getElementById('sale-list');
-  if (!cache.sales.length) { el.innerHTML = '<div class="empty">Sin ventas registradas.</div>'; return; }
-  el.innerHTML = cache.sales.map(function(s) {
+  if (!cache.sales.length) { el.innerHTML = '<div class="empty">Sin ventas registradas aún.<br>¡Cuando llegue la primera, aquí quedará todo documentado!</div>'; return; }
+  el.innerHTML = cache.sales.map(function(s){
     var prod = cache.products.find(function(p){ return p.id == s.prod_id; });
     return '<div class="list-item">' +
+      '<div class="img-placeholder" style="font-size:22px">🌿</div>' +
       '<div class="info"><p class="item-name">' + s.client + (prod ? ' — ' + prod.name : '') + '</p>' +
-      '<p class="item-meta">' + (s.amount||'—') + ' € · ' + (s.days != null ? s.days + ' días' : '—') + ' · ' + (s.req_date||'') + '</p></div>' +
+      '<p class="item-meta">' + (s.amount||'—') + ' € · ' + (s.days != null ? s.days + ' días' : '—') + (s.req_date ? ' · ' + s.req_date : '') + '</p></div>' +
       originBadge(s.origin) +
       '<div class="row-actions"><button class="btn btn-sm btn-danger" onclick="deleteSale(' + s.id + ')">Eliminar</button></div>' +
       '</div>';
@@ -715,62 +1006,62 @@ async function saveSale() {
   var d = document.getElementById('s-ddate').value;
   var days = (r && d) ? Math.round((new Date(d) - new Date(r)) / 86400000) : null;
   try {
-    await api('sales', 'POST', { client:client, prod_id:document.getElementById('s-prod').value?parseInt(document.getElementById('s-prod').value):null, req_date:r, del_date:d, days:days, amount:parseFloat(document.getElementById('s-amount').value)||null, origin:document.getElementById('s-origin').value, notes:document.getElementById('s-notes').value });
-    clearForm(['s-client','s-amount','s-notes','s-ddate']);
+    await sbFetch('sales', 'POST', { client, prod_id: document.getElementById('s-prod').value ? parseInt(document.getElementById('s-prod').value) : null, req_date: r, del_date: d, days, amount: parseFloat(document.getElementById('s-amount').value)||null, origin: document.getElementById('s-origin').value, notes: document.getElementById('s-notes').value });
+    clearFields(['s-client','s-amount','s-notes','s-ddate']);
     document.getElementById('s-days').textContent = '—';
     toggleForm('sale-form');
     await loadSales();
-    toast('Venta guardada');
+    toast('✓ Venta registrada');
   } catch(e) { toast('Error al guardar', true); }
 }
 async function deleteSale(id) {
-  if (!confirm('¿Eliminar venta?')) return;
-  await del('sales', id);
-  await loadSales();
-  toast('Eliminada');
+  if (!confirm('¿Eliminar esta venta?')) return;
+  await del('sales', id); await loadSales(); toast('Venta eliminada');
 }
 
-// --- DASHBOARD ---
+// DASHBOARD
 async function renderDash() {
   try {
     var [machines, materials, products, tests, sales] = await Promise.all([
       getAll('machines'), getAll('materials'), getAll('products'), getAll('tests'), getAll('sales')
     ]);
-    cache = { machines:machines, materials:materials, products:products, tests:tests, sales:sales };
+    cache = { machines, materials, products, tests, sales };
 
     var totalRev = sales.reduce(function(a,s){ return a + parseFloat(s.amount||0); }, 0);
     var avgDays = sales.length ? Math.round(sales.reduce(function(a,s){ return a+(s.days||0); },0)/sales.length) : 0;
+
     document.getElementById('dash-stats').innerHTML = [
-      { val: sales.length, lbl: 'Ventas totales' },
-      { val: totalRev.toFixed(2) + ' €', lbl: 'Facturación' },
-      { val: products.length, lbl: 'Productos' },
-      { val: avgDays + ' días', lbl: 'Entrega media' }
-    ].map(function(s){ return '<div class="stat-card"><div class="stat-val">'+s.val+'</div><div class="stat-lbl">'+s.lbl+'</div></div>'; }).join('');
+      { val: sales.length, lbl: 'Ventas totales', icon: '🌿' },
+      { val: totalRev.toFixed(2) + ' €', lbl: 'Facturación', icon: '💰' },
+      { val: products.length, lbl: 'Productos', icon: '📦' },
+      { val: avgDays + ' días', lbl: 'Entrega media', icon: '⏱' }
+    ].map(function(s){
+      return '<div class="stat-card"><div class="icon">' + s.icon + '</div><div class="val">' + s.val + '</div><div class="lbl">' + s.lbl + '</div></div>';
+    }).join('');
 
     var last = sales.slice(0, 5);
     var salesEl = document.getElementById('dash-sales');
-    if (!last.length) { salesEl.innerHTML = '<div class="empty" style="padding:20px">Sin ventas aún</div>'; }
+    if (!last.length) { salesEl.innerHTML = '<div class="empty" style="padding:24px">Sin ventas aún</div>'; }
     else {
       salesEl.innerHTML = last.map(function(s){
         var prod = products.find(function(p){ return p.id == s.prod_id; });
-        return '<div class="list-item" style="padding:10px 14px"><div class="info"><p class="item-name" style="font-size:12px">'+s.client+(prod?' — '+prod.name:'')+'</p><p class="item-meta" style="font-size:11px">'+(s.amount||'—')+' €</p></div>'+originBadge(s.origin)+'</div>';
+        return '<div class="list-item" style="padding:11px 14px"><div class="info"><p class="item-name" style="font-size:13px">' + s.client + (prod?' — '+prod.name:'') + '</p><p class="item-meta" style="font-size:11px">' + (s.amount||'—') + ' €</p></div>' + originBadge(s.origin) + '</div>';
       }).join('');
     }
 
     var origins = { instagram:0, wallapop:0, direct:0, known:0, search:0 };
-    sales.forEach(function(s){ if (origins[s.origin] !== undefined) origins[s.origin]++; });
-    var labels = { instagram:'Instagram', wallapop:'Wallapop', direct:'Directa', known:'Conocido', search:'Buscada' };
+    sales.forEach(function(s){ if(origins[s.origin]!==undefined) origins[s.origin]++; });
+    var labels = { instagram:'📷 Instagram', wallapop:'🏷️ Wallapop', direct:'🤝 Directa', known:'👥 Conocido', search:'🔍 Buscada' };
     var total2 = sales.length || 1;
     document.getElementById('dash-origins').innerHTML = Object.keys(origins).map(function(k){
-      var pct = Math.round(origins[k] / total2 * 100);
-      return '<div class="bar-row"><div class="bar-label"><span>'+labels[k]+'</span><span>'+origins[k]+'</span></div><div class="bar-track"><div class="bar-fill" style="width:'+pct+'%"></div></div></div>';
+      var pct = Math.round(origins[k]/total2*100);
+      return '<div class="bar-row"><div class="bar-label"><span>' + labels[k] + '</span><span>' + origins[k] + '</span></div><div class="bar-track"><div class="bar-fill" style="width:' + pct + '%"></div></div></div>';
     }).join('');
   } catch(e) {
-    document.getElementById('dash-stats').innerHTML = '<div class="empty">Error cargando datos</div>';
+    document.getElementById('dash-stats').innerHTML = '<div style="color:var(--rust);padding:20px">Error al cargar los datos</div>';
   }
 }
 
-// INIT
 checkStatus();
 renderDash();
 loadMachines();
