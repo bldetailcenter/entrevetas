@@ -461,6 +461,48 @@ main { flex: 1; padding: 32px; max-width: 980px; margin: 0 auto; width: 100%; }
   position: relative;
   top: -1px;
 }
+
+/* MODAL */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(44,31,14,0.55);
+  z-index: 500; display: flex; align-items: center; justify-content: center;
+  padding: 20px; opacity: 0; pointer-events: none; transition: opacity .25s;
+  backdrop-filter: blur(3px);
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--cream); border-radius: var(--radius-xl);
+  max-width: 600px; width: 100%; max-height: 88vh; overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(44,31,14,0.3);
+  transform: translateY(16px) scale(0.98);
+  transition: transform .25s;
+  border: 1px solid var(--border2);
+}
+.modal-overlay.open .modal { transform: translateY(0) scale(1); }
+.modal-header {
+  padding: 24px 28px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  position: sticky; top: 0; background: var(--cream); z-index: 1;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+}
+.modal-title { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--bark); }
+.modal-subtitle { font-size: 12px; color: var(--text3); margin-top: 3px; }
+.modal-close {
+  background: none; border: 1px solid var(--border2); border-radius: 50%;
+  width: 32px; height: 32px; font-size: 16px; cursor: pointer; color: var(--text2);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  transition: all .15s;
+}
+.modal-close:hover { background: var(--cream3); color: var(--bark); }
+.modal-body { padding: 24px 28px; }
+.modal-photo { width: 100%; max-height: 220px; object-fit: cover; border-radius: var(--radius-lg); margin-bottom: 20px; border: 1px solid var(--border); }
+.modal-field { margin-bottom: 14px; }
+.modal-field-label { font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); margin-bottom: 4px; }
+.modal-field-value { font-size: 14px; color: var(--text); }
+.modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
+.modal-divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+.modal-footer { padding: 16px 28px 24px; display: flex; gap: 10px; }
 </style>
 </head>
 <body>
@@ -700,6 +742,22 @@ main { flex: 1; padding: 32px; max-width: 980px; margin: 0 auto; width: 100%; }
 </main>
 </div>
 
+
+<!-- MODAL DETALLE -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modal-title"></div>
+        <div class="modal-subtitle" id="modal-subtitle"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer" id="modal-footer"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -867,7 +925,7 @@ function renderMachines() {
   var el = document.getElementById('machine-list');
   if (!cache.machines.length) { el.innerHTML = '<div class="empty">Aún no hay máquinas registradas.<br>Añade tu primera máquina para comenzar.</div>'; return; }
   el.innerHTML = cache.machines.map(function(m){
-    return '<div class="list-item">' +
+    return '<div class="list-item" style="cursor:pointer" onclick="showMachine(' + m.id + ')">' +
       '<div class="img-placeholder" style="font-size:22px">⚙️</div>' +
       '<div class="info"><p class="item-name">' + m.name + '</p><p class="item-meta">' + (m.brand||'') + ' · ' + (m.power||'—') + ' W · ' + (m.area||'—') + '</p></div>' +
       statusBadge(m.status||'active') +
@@ -931,7 +989,7 @@ function renderMaterials() {
   var el = document.getElementById('mat-list');
   if (!cache.materials.length) { el.innerHTML = '<div class="empty">Sin materiales registrados.<br>Añade tus primeros materiales de trabajo.</div>'; return; }
   el.innerHTML = cache.materials.map(function(m){
-    return '<div class="list-item">' +
+    return '<div class="list-item" style="cursor:pointer" onclick="showMaterial(' + m.id + ')">' +
       imgOrPlaceholder(m.photo) +
       '<div class="info"><p class="item-name">' + m.name + '</p><p class="item-meta">' + (m.brand||'') + ' · ' + (m.thick||'—') + 'mm · ' + (m.size||'—') + (m.ppm2 ? ' · <strong>' + m.ppm2 + ' €/m²</strong>' : '') + '</p></div>' +
       typeBadge(m.type) +
@@ -1005,7 +1063,7 @@ function renderTests() {
     var mat = cache.materials.find(function(m){ return m.id == t.mat_id; });
     var machine = cache.machines.find(function(m){ return m.id == t.machine_id; });
     var tb = t.type === 'engrave' ? '<span class="badge b-engrave">✦ Grabado</span>' : '<span class="badge b-cut">✂ Corte</span>';
-    return '<div class="list-item">' +
+    return '<div class="list-item" style="cursor:pointer" onclick="showTest(' + t.id + ')">' +
       imgOrPlaceholder(t.photo) +
       '<div class="info"><p class="item-name">' + (mat?mat.name:'—') + ' &nbsp;' + tb + '</p>' +
       '<p class="item-meta">' + (machine?machine.name:'—') + ' · ' + (t.speed||'—') + ' mm/min · ' + (t.power||'—') + '% · ' + (t.passes||1) + ' pas.</p></div>' +
@@ -1087,7 +1145,7 @@ function renderProducts() {
   if (!cache.products.length) { el.innerHTML = '<div class="empty">Sin productos en el catálogo.<br>Documenta tus creaciones para calcular costes.</div>'; return; }
   el.innerHTML = cache.products.map(function(p){
     var mat = cache.materials.find(function(m){ return m.id == p.mat_id; });
-    return '<div class="list-item">' +
+    return '<div class="list-item" style="cursor:pointer" onclick="showProduct(' + p.id + ')">' +
       imgOrPlaceholder(p.photo) +
       '<div class="info"><p class="item-name">' + p.name + (p.sale_price ? ' <span style="color:var(--moss);font-size:12px;font-weight:400">· PVP ' + p.sale_price + ' €</span>' : '') + '</p>' +
       '<p class="item-meta">' + (mat?mat.name:'—') + ' · ⏱ Láser: ' + (p.laser_time||'—') + ' min · Ensamblaje: ' + (p.assembly_time||'—') + ' min' + (p.mat_cost ? ' · Mat: <strong>' + p.mat_cost + ' €</strong>' : '') + '</p></div>' +
@@ -1170,7 +1228,7 @@ function renderSales() {
   if (!cache.sales.length) { el.innerHTML = '<div class="empty">Sin ventas registradas aún.<br>¡Cuando llegue la primera, aquí quedará todo documentado!</div>'; return; }
   el.innerHTML = cache.sales.map(function(s){
     var prod = cache.products.find(function(p){ return p.id == s.prod_id; });
-    return '<div class="list-item">' +
+    return '<div class="list-item" style="cursor:pointer" onclick="showSale(' + s.id + ')">' +
       '<div class="img-placeholder" style="font-size:22px">🌿</div>' +
       '<div class="info"><p class="item-name">' + s.client + (prod ? ' — ' + prod.name : '') + '</p>' +
       '<p class="item-meta">' + (s.amount||'—') + ' € · ' + (s.days != null ? s.days + ' días' : '—') + (s.req_date ? ' · ' + s.req_date : '') + '</p></div>' +
@@ -1350,6 +1408,106 @@ loadTests = async function() {
   populateSel('params-mat-sel', cache.materials, 'name');
   document.getElementById('params-table-wrap').innerHTML = '';
 };
+
+
+// =====================
+// MODAL DETALLE
+// =====================
+function openModal(title, subtitle, bodyHtml, editFn, editId) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-subtitle').textContent = subtitle || '';
+  document.getElementById('modal-body').innerHTML = bodyHtml;
+  var footer = document.getElementById('modal-footer');
+  if (editFn) {
+    footer.innerHTML = '<button class="btn btn-primary" onclick="' + editFn + '(' + editId + ');closeModal()">✏️ Editar</button>';
+  } else {
+    footer.innerHTML = '';
+  }
+  document.getElementById('modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modal-overlay')) return;
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeModal(); });
+
+function mf(label, value) {
+  if (!value && value !== 0) return '';
+  return '<div class="modal-field"><div class="modal-field-label">' + label + '</div><div class="modal-field-value">' + value + '</div></div>';
+}
+function mfGrid(fields) {
+  return '<div class="modal-grid">' + fields.map(function(f){ return mf(f[0],f[1]); }).join('') + '</div>';
+}
+
+function showMachine(id) {
+  var m = cache.machines.find(function(x){ return x.id===id; });
+  if (!m) return;
+  var body = mf('Marca', m.brand) +
+    mfGrid([['Potencia máx.', m.power ? m.power+' W' : null],['Área de trabajo', m.area]]) +
+    mf('Estado', statusBadge(m.status||'active')) +
+    (m.notes ? '<hr class="modal-divider">' + mf('Notas', m.notes) : '');
+  openModal(m.name, 'Máquina láser', body, 'editMachine', id);
+}
+
+function showMaterial(id) {
+  var m = cache.materials.find(function(x){ return x.id===id; });
+  if (!m) return;
+  var body = (m.photo ? '<img class="modal-photo" src="' + m.photo + '">' : '') +
+    mfGrid([['Tipo', typeBadge(m.type)],['Grosor', m.thick ? m.thick+' mm' : null]]) +
+    mfGrid([['Marca / Proveedor', m.brand],['Medidas de venta', m.size]]) +
+    '<hr class="modal-divider">' +
+    mfGrid([['Precio por pieza', m.price ? m.price+' €' : null],['€ / m²', m.ppm2 ? m.ppm2+' €/m²' : null]]) +
+    (m.notes ? '<hr class="modal-divider">' + mf('Notas', m.notes) : '');
+  openModal(m.name, 'Ficha de material', body, 'editMaterial', id);
+}
+
+function showTest(id) {
+  var t = cache.tests.find(function(x){ return x.id===id; });
+  if (!t) return;
+  var mat = cache.materials.find(function(m){ return m.id==t.mat_id; });
+  var machine = cache.machines.find(function(m){ return m.id==t.machine_id; });
+  var tb = t.type==='engrave' ? '<span class="badge b-engrave">✦ Grabado</span>' : '<span class="badge b-cut">✂ Corte</span>';
+  var body = (t.photo ? '<img class="modal-photo" src="' + t.photo + '">' : '') +
+    mfGrid([['Material', mat?mat.name:'—'],['Máquina', machine?machine.name:'—']]) +
+    mfGrid([['Tipo', tb],['Resultado', resultBadge(t.result)]]) +
+    '<hr class="modal-divider">' +
+    mfGrid([['Velocidad', t.speed ? t.speed+' mm/min' : null],['Potencia', t.power ? t.power+'%' : null]]) +
+    mf('Nº de pasadas', t.passes) +
+    (t.notes ? '<hr class="modal-divider">' + mf('Observaciones', t.notes) : '');
+  var subtitle = mat ? 'Prueba sobre ' + mat.name : 'Prueba de grabado/corte';
+  openModal(t.type==='engrave'?'Prueba de grabado':'Prueba de corte', subtitle, body, 'editTest', id);
+}
+
+function showProduct(id) {
+  var p = cache.products.find(function(x){ return x.id===id; });
+  if (!p) return;
+  var mat = cache.materials.find(function(m){ return m.id==p.mat_id; });
+  var body = (p.photo ? '<img class="modal-photo" src="' + p.photo + '">' : '') +
+    mf('Material', mat?mat.name:null) +
+    mfGrid([['Coste material', p.mat_cost ? p.mat_cost+' €' : null],['Precio de venta', p.sale_price ? p.sale_price+' €' : null]]) +
+    '<hr class="modal-divider">' +
+    mfGrid([['Tiempo láser', p.laser_time ? p.laser_time+' min' : null],['Tiempo ensamblaje', p.assembly_time ? p.assembly_time+' min' : null]]) +
+    mf('Material usado', p.qty ? p.qty+' cm²' : null) +
+    (p.description ? '<hr class="modal-divider">' + mf('Descripción', p.description) : '');
+  openModal(p.name, 'Ficha de producto', body, 'editProduct', id);
+}
+
+function showSale(id) {
+  var s = cache.sales.find(function(x){ return x.id===id; });
+  if (!s) return;
+  var prod = cache.products.find(function(p){ return p.id==s.prod_id; });
+  var body = mf('Producto', prod?prod.name:null) +
+    mfGrid([['Importe cobrado', s.amount ? s.amount+' €' : null],['Procedencia', originBadge(s.origin)]]) +
+    '<hr class="modal-divider">' +
+    mfGrid([['Fecha solicitud', s.req_date],['Fecha entrega', s.del_date]]) +
+    mf('Días transcurridos', s.days!=null ? s.days+' días' : null) +
+    (s.notes ? '<hr class="modal-divider">' + mf('Notas', s.notes) : '');
+  openModal(s.client, 'Registro de venta', body, 'editSale', id);
+}
 
 checkStatus();
 renderDash();
