@@ -516,7 +516,7 @@ main { flex: 1; padding: 32px; max-width: 980px; margin: 0 auto; width: 100%; }
     <button class="btn btn-primary btn-sm" onclick="toggleForm('machine-form')">+ Añadir máquina</button>
   </div>
   <div id="machine-form" class="card" style="display:none;margin-bottom:24px">
-    <p style="font-family:'Playfair Display',serif;font-size:17px;margin-bottom:18px;color:var(--bark)">Nueva máquina</p>
+    <p data-form-title style="font-family:'Playfair Display',serif;font-size:17px;margin-bottom:18px;color:var(--bark)">data-form-title>Nueva máquina</p>
     <div class="grid-2 form-section">
       <div class="field"><label>Nombre</label><input id="m-name" placeholder="Twotrees TTS-55 PRO"></div>
       <div class="field"><label>Marca</label><input id="m-brand" placeholder="Twotrees"></div>
@@ -544,7 +544,7 @@ main { flex: 1; padding: 32px; max-width: 980px; margin: 0 auto; width: 100%; }
     <button class="btn btn-primary btn-sm" onclick="toggleForm('mat-form')">+ Añadir material</button>
   </div>
   <div id="mat-form" class="card" style="display:none;margin-bottom:24px">
-    <p style="font-family:'Playfair Display',serif;font-size:17px;margin-bottom:18px;color:var(--bark)">Nuevo material</p>
+    <p data-form-title style="font-family:'Playfair Display',serif;font-size:17px;margin-bottom:18px;color:var(--bark)">data-form-title>Nuevo material</p>
     <div class="grid-2 form-section">
       <div class="field"><label>Nombre del material</label><input id="mat-name" placeholder="DM 3mm natural reciclado"></div>
       <div class="field"><label>Tipo</label>
@@ -582,7 +582,7 @@ main { flex: 1; padding: 32px; max-width: 980px; margin: 0 auto; width: 100%; }
     <button class="btn btn-primary btn-sm" onclick="toggleForm('test-form')">+ Nueva prueba</button>
   </div>
   <div id="test-form" class="card" style="display:none;margin-bottom:24px">
-    <p style="font-family:'Playfair Display',serif;font-size:17px;margin-bottom:18px;color:var(--bark)">Registrar prueba</p>
+    <p data-form-title style="font-family:'Playfair Display',serif;font-size:17px;margin-bottom:18px;color:var(--bark)">data-form-title>Registrar prueba</p>
     <div class="grid-2 form-section">
       <div class="field"><label>Material</label><select id="t-mat"><option value="">Seleccionar...</option></select></div>
       <div class="field"><label>Máquina</label><select id="t-machine"><option value="">Seleccionar...</option></select></div>
@@ -631,7 +631,7 @@ main { flex: 1; padding: 32px; max-width: 980px; margin: 0 auto; width: 100%; }
     <button class="btn btn-primary btn-sm" onclick="toggleForm('prod-form')">+ Nuevo producto</button>
   </div>
   <div id="prod-form" class="card" style="display:none;margin-bottom:24px">
-    <p style="font-family:'Playfair Display',serif;font-size:17px;margin-bottom:18px;color:var(--bark)">Nuevo producto</p>
+    <p data-form-title style="font-family:'Playfair Display',serif;font-size:17px;margin-bottom:18px;color:var(--bark)">data-form-title>Nuevo producto</p>
     <div class="grid-2 form-section">
       <div class="field"><label>Nombre del producto</label><input id="p-name" placeholder="Caja personalizada DM reciclado"></div>
       <div class="field"><label>Material principal</label><select id="p-mat" onchange="calcMatCost()"><option value="">Seleccionar...</option></select></div>
@@ -641,9 +641,10 @@ main { flex: 1; padding: 32px; max-width: 980px; margin: 0 auto; width: 100%; }
       <div class="field"><label>Coste de material (€)</label><div class="computed" id="p-matcost">—</div></div>
       <div class="field"><label>Precio sugerido (€)</label><div class="computed" id="p-suggested">—</div></div>
     </div>
-    <div class="grid-2 form-section">
+    <div class="grid-3 form-section">
       <div class="field"><label>Tiempo láser (min)</label><input id="p-ltime" type="number" placeholder="25"></div>
       <div class="field"><label>Tiempo ensamblaje (min)</label><input id="p-atime" type="number" placeholder="10"></div>
+      <div class="field"><label>Precio de venta (€)</label><input id="p-saleprice" type="number" step="0.01" placeholder="35.00"></div>
     </div>
     <div class="grid-2 form-section">
       <div class="field"><label>Descripción</label><textarea id="p-desc" placeholder="Medidas finales, personalización disponible, proceso de creación..."></textarea></div>
@@ -665,7 +666,7 @@ main { flex: 1; padding: 32px; max-width: 980px; margin: 0 auto; width: 100%; }
     <button class="btn btn-primary btn-sm" onclick="toggleForm('sale-form')">+ Nueva venta</button>
   </div>
   <div id="sale-form" class="card" style="display:none;margin-bottom:24px">
-    <p style="font-family:'Playfair Display',serif;font-size:17px;margin-bottom:18px;color:var(--bark)">Nueva venta</p>
+    <p data-form-title style="font-family:'Playfair Display',serif;font-size:17px;margin-bottom:18px;color:var(--bark)">data-form-title>Nueva venta</p>
     <div class="grid-2 form-section">
       <div class="field"><label>Cliente</label><input id="s-client" placeholder="Nombre o referencia del cliente"></div>
       <div class="field"><label>Producto vendido</label><select id="s-prod"><option value="">Seleccionar...</option></select></div>
@@ -706,6 +707,9 @@ const SUPABASE_URL = 'https://tfcwlnnbhhowfngbkqhp.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_U4wLe-WNS-ItfWf7nmbjfg_Zh18SStZ';
 
 var cache = { machines:[], materials:[], products:[], tests:[], sales:[] };
+
+// editing state per section
+var editing = { machine:null, material:null, test:null, product:null, sale:null };
 
 async function sbFetch(table, method, body, filter) {
   var url = SUPABASE_URL + '/rest/v1/' + table;
@@ -763,10 +767,37 @@ function showTab(name, btn) {
 
 function toggleForm(id) {
   var el = document.getElementById(id);
-  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+  var isOpen = el.style.display !== 'none';
+  if (isOpen) {
+    el.style.display = 'none';
+    // reset editing state for this form
+    var map = {'machine-form':'machine','mat-form':'material','test-form':'test','prod-form':'product','sale-form':'sale'};
+    if (map[id]) { editing[map[id]] = null; resetFormTitle(id); }
+    return;
+  }
+  el.style.display = 'block';
   if (id === 'test-form') { populateSel('t-mat', cache.materials, 'name'); populateSel('t-machine', cache.machines, 'name'); }
   if (id === 'prod-form') populateSel('p-mat', cache.materials, 'name');
-  if (id === 'sale-form') { populateSel('s-prod', cache.products, 'name'); document.getElementById('s-rdate').value = new Date().toISOString().split('T')[0]; }
+  if (id === 'sale-form') { populateSel('s-prod', cache.products, 'name'); if (!document.getElementById('s-rdate').value) document.getElementById('s-rdate').value = new Date().toISOString().split('T')[0]; }
+}
+
+function resetFormTitle(formId) {
+  var titles = {
+    'machine-form': 'Nueva máquina',
+    'mat-form': 'Nuevo material',
+    'test-form': 'Registrar prueba',
+    'prod-form': 'Nuevo producto',
+    'sale-form': 'Nueva venta'
+  };
+  var p = document.querySelector('#' + formId + ' p[data-form-title]');
+  if (p && titles[formId]) p.textContent = titles[formId];
+  // reset save button text
+  var btn = document.querySelector('#' + formId + ' button.btn-primary');
+  var btnTexts = {
+    'machine-form':'Guardar máquina','mat-form':'Guardar material',
+    'test-form':'Guardar prueba','prod-form':'Guardar producto','sale-form':'Guardar venta'
+  };
+  if (btn && btnTexts[formId]) btn.textContent = btnTexts[formId];
 }
 
 function populateSel(id, arr, field) {
@@ -794,6 +825,9 @@ function getImgData(inputId) {
 
 function clearFields(ids) { ids.forEach(function(id){ var el = document.getElementById(id); if(el) el.value = ''; }); }
 
+function setVal(id, val) { var el = document.getElementById(id); if(el && val != null) el.value = val; }
+function setSelVal(id, val) { var el = document.getElementById(id); if(el && val != null) el.value = val; }
+
 function typeBadge(t) {
   var map = { wood:'b-wood', acrylic:'b-acrylic', metal:'b-metal', other:'b-other' };
   var lbl = { wood:'🪵 Madera', acrylic:'🔷 Acrílico', metal:'⚙️ Metal', other:'♻️ Otros' };
@@ -815,7 +849,16 @@ function imgOrPlaceholder(photo) {
   return photo ? '<img class="img-thumb" src="' + photo + '">' : '<div class="img-placeholder">🌿</div>';
 }
 
+function editBtn(fn, id) {
+  return '<button class="btn btn-sm" onclick="' + fn + '(' + id + ');event.stopPropagation()" style="border-color:var(--moss);color:var(--moss)">Editar</button>';
+}
+function delBtn(fn, id) {
+  return '<button class="btn btn-sm btn-danger" onclick="' + fn + '(' + id + ');event.stopPropagation()">Eliminar</button>';
+}
+
+// =====================
 // MACHINES
+// =====================
 async function loadMachines() {
   try { cache.machines = await getAll('machines'); renderMachines(); }
   catch(e) { toast('Error cargando máquinas', true); }
@@ -827,20 +870,42 @@ function renderMachines() {
     return '<div class="list-item">' +
       '<div class="img-placeholder" style="font-size:22px">⚙️</div>' +
       '<div class="info"><p class="item-name">' + m.name + '</p><p class="item-meta">' + (m.brand||'') + ' · ' + (m.power||'—') + ' W · ' + (m.area||'—') + '</p></div>' +
-      statusBadge(m.status) +
-      '<div class="row-actions"><button class="btn btn-sm btn-danger" onclick="deleteMachine(' + m.id + ')">Eliminar</button></div>' +
+      statusBadge(m.status||'active') +
+      '<div class="row-actions">' + editBtn('editMachine', m.id) + delBtn('deleteMachine', m.id) + '</div>' +
       '</div>';
   }).join('');
+}
+function editMachine(id) {
+  var m = cache.machines.find(function(x){ return x.id === id; });
+  if (!m) return;
+  editing.machine = id;
+  setVal('m-name', m.name); setVal('m-brand', m.brand); setVal('m-power', m.power);
+  setVal('m-area', m.area); setSelVal('m-status', m.status); setVal('m-notes', m.notes);
+  var form = document.getElementById('machine-form');
+  form.style.display = 'block';
+  var p = form.querySelector('p[data-form-title]');
+  if (p) p.textContent = 'Editando: ' + m.name;
+  var btn = form.querySelector('button.btn-primary');
+  if (btn) btn.textContent = 'Actualizar máquina';
+  form.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 async function saveMachine() {
   var name = document.getElementById('m-name').value.trim();
   if (!name) { toast('Introduce el nombre de la máquina', true); return; }
+  var data = { name, brand: document.getElementById('m-brand').value, power: document.getElementById('m-power').value, area: document.getElementById('m-area').value, status: document.getElementById('m-status').value, notes: document.getElementById('m-notes').value };
   try {
-    await sbFetch('machines', 'POST', { name, brand: document.getElementById('m-brand').value, power: document.getElementById('m-power').value, area: document.getElementById('m-area').value, status: document.getElementById('m-status').value, notes: document.getElementById('m-notes').value });
+    if (editing.machine) {
+      await sbFetch('machines', 'PATCH', data, 'id=eq.' + editing.machine);
+      editing.machine = null;
+      toast('✓ Máquina actualizada');
+    } else {
+      await sbFetch('machines', 'POST', data);
+      toast('✓ Máquina guardada');
+    }
     clearFields(['m-name','m-brand','m-power','m-area','m-notes']);
-    toggleForm('machine-form');
+    document.getElementById('machine-form').style.display = 'none';
+    resetFormTitle('machine-form');
     await loadMachines();
-    toast('✓ Máquina guardada');
   } catch(e) { toast('Error al guardar', true); }
 }
 async function deleteMachine(id) {
@@ -848,7 +913,9 @@ async function deleteMachine(id) {
   await del('machines', id); await loadMachines(); toast('Máquina eliminada');
 }
 
+// =====================
 // MATERIALS
+// =====================
 function calcPpm2() {
   var price = parseFloat(document.getElementById('mat-price').value)||0;
   var w = parseFloat(document.getElementById('mat-w').value)||0;
@@ -868,9 +935,26 @@ function renderMaterials() {
       imgOrPlaceholder(m.photo) +
       '<div class="info"><p class="item-name">' + m.name + '</p><p class="item-meta">' + (m.brand||'') + ' · ' + (m.thick||'—') + 'mm · ' + (m.size||'—') + (m.ppm2 ? ' · <strong>' + m.ppm2 + ' €/m²</strong>' : '') + '</p></div>' +
       typeBadge(m.type) +
-      '<div class="row-actions"><button class="btn btn-sm btn-danger" onclick="deleteMaterial(' + m.id + ')">Eliminar</button></div>' +
+      '<div class="row-actions">' + editBtn('editMaterial', m.id) + delBtn('deleteMaterial', m.id) + '</div>' +
       '</div>';
   }).join('');
+}
+function editMaterial(id) {
+  var m = cache.materials.find(function(x){ return x.id === id; });
+  if (!m) return;
+  editing.material = id;
+  setVal('mat-name', m.name); setSelVal('mat-type', m.type); setVal('mat-thick', m.thick);
+  setVal('mat-brand', m.brand); setVal('mat-size', m.size); setVal('mat-price', m.price);
+  setVal('mat-w', m.w); setVal('mat-h', m.h); setVal('mat-notes', m.notes);
+  calcPpm2();
+  if (m.photo) document.getElementById('mat-photo-prev').innerHTML = '<img src="' + m.photo + '" style="max-height:100px;border-radius:8px;margin-bottom:4px"><br><small style="color:var(--text3);font-size:11px">Foto actual — sube una nueva para reemplazarla</small>';
+  var form = document.getElementById('mat-form');
+  form.style.display = 'block';
+  var p = form.querySelector('p[data-form-title]');
+  if (p) p.textContent = 'Editando: ' + m.name;
+  var btn = form.querySelector('button.btn-primary');
+  if (btn) btn.textContent = 'Actualizar material';
+  form.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 async function saveMaterial() {
   var name = document.getElementById('mat-name').value.trim();
@@ -879,16 +963,25 @@ async function saveMaterial() {
   var w = parseFloat(document.getElementById('mat-w').value)||0;
   var h = parseFloat(document.getElementById('mat-h').value)||0;
   var ppm2 = (price && w && h) ? (price / ((w*h)/10000)).toFixed(2) : null;
-  var photo = await getImgData('mat-photo');
+  var newPhoto = await getImgData('mat-photo');
+  var data = { name, type: document.getElementById('mat-type').value, thick: document.getElementById('mat-thick').value, brand: document.getElementById('mat-brand').value, size: document.getElementById('mat-size').value, price, w, h, ppm2, notes: document.getElementById('mat-notes').value };
+  if (newPhoto) data.photo = newPhoto;
   try {
-    await sbFetch('materials', 'POST', { name, type: document.getElementById('mat-type').value, thick: document.getElementById('mat-thick').value, brand: document.getElementById('mat-brand').value, size: document.getElementById('mat-size').value, price, w, h, ppm2, photo, notes: document.getElementById('mat-notes').value });
+    if (editing.material) {
+      await sbFetch('materials', 'PATCH', data, 'id=eq.' + editing.material);
+      editing.material = null;
+      toast('✓ Material actualizado');
+    } else {
+      await sbFetch('materials', 'POST', data);
+      toast('✓ Material guardado');
+    }
     clearFields(['mat-name','mat-thick','mat-brand','mat-size','mat-price','mat-w','mat-h','mat-notes']);
     document.getElementById('mat-photo').value = '';
     document.getElementById('mat-photo-prev').innerHTML = '';
     document.getElementById('mat-ppm2').textContent = '—';
-    toggleForm('mat-form');
+    document.getElementById('mat-form').style.display = 'none';
+    resetFormTitle('mat-form');
     await loadMaterials();
-    toast('✓ Material guardado');
   } catch(e) { toast('Error al guardar: ' + e.message, true); }
 }
 async function deleteMaterial(id) {
@@ -896,7 +989,9 @@ async function deleteMaterial(id) {
   await del('materials', id); await loadMaterials(); toast('Material eliminado');
 }
 
+// =====================
 // TESTS
+// =====================
 async function loadTests() {
   try {
     [cache.tests, cache.materials, cache.machines] = await Promise.all([getAll('tests'), getAll('materials'), getAll('machines')]);
@@ -915,22 +1010,50 @@ function renderTests() {
       '<div class="info"><p class="item-name">' + (mat?mat.name:'—') + ' &nbsp;' + tb + '</p>' +
       '<p class="item-meta">' + (machine?machine.name:'—') + ' · ' + (t.speed||'—') + ' mm/min · ' + (t.power||'—') + '% · ' + (t.passes||1) + ' pas.</p></div>' +
       resultBadge(t.result) +
-      '<div class="row-actions"><button class="btn btn-sm btn-danger" onclick="deleteTest(' + t.id + ')">Eliminar</button></div>' +
+      '<div class="row-actions">' + editBtn('editTest', t.id) + delBtn('deleteTest', t.id) + '</div>' +
       '</div>';
   }).join('');
+}
+function editTest(id) {
+  var t = cache.tests.find(function(x){ return x.id === id; });
+  if (!t) return;
+  editing.test = id;
+  populateSel('t-mat', cache.materials, 'name');
+  populateSel('t-machine', cache.machines, 'name');
+  setSelVal('t-mat', t.mat_id); setSelVal('t-machine', t.machine_id);
+  setSelVal('t-type', t.type); setVal('t-passes', t.passes);
+  setVal('t-speed', t.speed); setVal('t-power', t.power);
+  setSelVal('t-result', t.result); setVal('t-notes', t.notes);
+  if (t.photo) document.getElementById('t-photo-prev').innerHTML = '<img src="' + t.photo + '" style="max-height:100px;border-radius:8px;margin-bottom:4px"><br><small style="color:var(--text3);font-size:11px">Foto actual — sube una nueva para reemplazarla</small>';
+  var form = document.getElementById('test-form');
+  form.style.display = 'block';
+  var p = form.querySelector('p[data-form-title]');
+  if (p) p.textContent = 'Editando prueba';
+  var btn = form.querySelector('button.btn-primary');
+  if (btn) btn.textContent = 'Actualizar prueba';
+  form.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 async function saveTest() {
   var matId = document.getElementById('t-mat').value;
   if (!matId) { toast('Selecciona un material', true); return; }
-  var photo = await getImgData('t-photo');
+  var newPhoto = await getImgData('t-photo');
+  var data = { mat_id: parseInt(matId), machine_id: parseInt(document.getElementById('t-machine').value)||null, type: document.getElementById('t-type').value, passes: document.getElementById('t-passes').value, speed: document.getElementById('t-speed').value, power: document.getElementById('t-power').value, result: document.getElementById('t-result').value, notes: document.getElementById('t-notes').value };
+  if (newPhoto) data.photo = newPhoto;
   try {
-    await sbFetch('tests', 'POST', { mat_id: parseInt(matId), machine_id: parseInt(document.getElementById('t-machine').value)||null, type: document.getElementById('t-type').value, passes: document.getElementById('t-passes').value, speed: document.getElementById('t-speed').value, power: document.getElementById('t-power').value, result: document.getElementById('t-result').value, photo, notes: document.getElementById('t-notes').value });
+    if (editing.test) {
+      await sbFetch('tests', 'PATCH', data, 'id=eq.' + editing.test);
+      editing.test = null;
+      toast('✓ Prueba actualizada');
+    } else {
+      await sbFetch('tests', 'POST', data);
+      toast('✓ Prueba guardada');
+    }
     clearFields(['t-speed','t-power','t-passes','t-notes']);
     document.getElementById('t-photo').value = '';
     document.getElementById('t-photo-prev').innerHTML = '';
-    toggleForm('test-form');
+    document.getElementById('test-form').style.display = 'none';
+    resetFormTitle('test-form');
     await loadTests();
-    toast('✓ Prueba guardada');
   } catch(e) { toast('Error al guardar', true); }
 }
 async function deleteTest(id) {
@@ -938,7 +1061,9 @@ async function deleteTest(id) {
   await del('tests', id); await loadTests(); toast('Prueba eliminada');
 }
 
+// =====================
 // PRODUCTS
+// =====================
 function calcMatCost() {
   var matId = document.getElementById('p-mat').value;
   var qty = parseFloat(document.getElementById('p-qty').value)||0;
@@ -964,11 +1089,30 @@ function renderProducts() {
     var mat = cache.materials.find(function(m){ return m.id == p.mat_id; });
     return '<div class="list-item">' +
       imgOrPlaceholder(p.photo) +
-      '<div class="info"><p class="item-name">' + p.name + '</p>' +
+      '<div class="info"><p class="item-name">' + p.name + (p.sale_price ? ' <span style="color:var(--moss);font-size:12px;font-weight:400">· PVP ' + p.sale_price + ' €</span>' : '') + '</p>' +
       '<p class="item-meta">' + (mat?mat.name:'—') + ' · ⏱ Láser: ' + (p.laser_time||'—') + ' min · Ensamblaje: ' + (p.assembly_time||'—') + ' min' + (p.mat_cost ? ' · Mat: <strong>' + p.mat_cost + ' €</strong>' : '') + '</p></div>' +
-      '<div class="row-actions"><button class="btn btn-sm btn-danger" onclick="deleteProduct(' + p.id + ')">Eliminar</button></div>' +
+      '<div class="row-actions">' + editBtn('editProduct', p.id) + delBtn('deleteProduct', p.id) + '</div>' +
       '</div>';
   }).join('');
+}
+function editProduct(id) {
+  var p = cache.products.find(function(x){ return x.id === id; });
+  if (!p) return;
+  editing.product = id;
+  populateSel('p-mat', cache.materials, 'name');
+  setVal('p-name', p.name); setSelVal('p-mat', p.mat_id);
+  setVal('p-qty', p.qty); setVal('p-ltime', p.laser_time);
+  setVal('p-atime', p.assembly_time); setVal('p-desc', p.description);
+  setVal('p-saleprice', p.sale_price);
+  calcMatCost();
+  if (p.photo) document.getElementById('p-photo-prev').innerHTML = '<img src="' + p.photo + '" style="max-height:100px;border-radius:8px;margin-bottom:4px"><br><small style="color:var(--text3);font-size:11px">Foto actual — sube una nueva para reemplazarla</small>';
+  var form = document.getElementById('prod-form');
+  form.style.display = 'block';
+  var pr = form.querySelector('p[data-form-title]');
+  if (pr) pr.textContent = 'Editando: ' + p.name;
+  var btn = form.querySelector('button.btn-primary');
+  if (btn) btn.textContent = 'Actualizar producto';
+  form.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 async function saveProduct() {
   var name = document.getElementById('p-name').value.trim();
@@ -977,17 +1121,27 @@ async function saveProduct() {
   var qty = parseFloat(document.getElementById('p-qty').value)||0;
   var mat = cache.materials.find(function(m){ return m.id == matId; });
   var matCost = (mat && mat.ppm2 && qty) ? (parseFloat(mat.ppm2) * qty / 10000).toFixed(2) : null;
-  var photo = await getImgData('p-photo');
+  var newPhoto = await getImgData('p-photo');
+  var salePrice = parseFloat(document.getElementById('p-saleprice').value)||null;
+  var data = { name, mat_id: matId ? parseInt(matId) : null, qty, mat_cost: matCost, laser_time: document.getElementById('p-ltime').value, assembly_time: document.getElementById('p-atime').value, description: document.getElementById('p-desc').value, sale_price: salePrice };
+  if (newPhoto) data.photo = newPhoto;
   try {
-    await sbFetch('products', 'POST', { name, mat_id: matId ? parseInt(matId) : null, qty, mat_cost: matCost, laser_time: document.getElementById('p-ltime').value, assembly_time: document.getElementById('p-atime').value, description: document.getElementById('p-desc').value, photo });
-    clearFields(['p-name','p-qty','p-ltime','p-atime','p-desc']);
+    if (editing.product) {
+      await sbFetch('products', 'PATCH', data, 'id=eq.' + editing.product);
+      editing.product = null;
+      toast('✓ Producto actualizado');
+    } else {
+      await sbFetch('products', 'POST', data);
+      toast('✓ Producto guardado');
+    }
+    clearFields(['p-name','p-qty','p-ltime','p-atime','p-desc','p-saleprice']);
     document.getElementById('p-photo').value = '';
     document.getElementById('p-photo-prev').innerHTML = '';
     document.getElementById('p-matcost').textContent = '—';
     document.getElementById('p-suggested').textContent = '—';
-    toggleForm('prod-form');
+    document.getElementById('prod-form').style.display = 'none';
+    resetFormTitle('prod-form');
     await loadProducts();
-    toast('✓ Producto guardado');
   } catch(e) { toast('Error al guardar', true); }
 }
 async function deleteProduct(id) {
@@ -995,7 +1149,9 @@ async function deleteProduct(id) {
   await del('products', id); await loadProducts(); toast('Producto eliminado');
 }
 
+// =====================
 // SALES
+// =====================
 function calcDays() {
   var r = document.getElementById('s-rdate').value;
   var d = document.getElementById('s-ddate').value;
@@ -1019,9 +1175,27 @@ function renderSales() {
       '<div class="info"><p class="item-name">' + s.client + (prod ? ' — ' + prod.name : '') + '</p>' +
       '<p class="item-meta">' + (s.amount||'—') + ' € · ' + (s.days != null ? s.days + ' días' : '—') + (s.req_date ? ' · ' + s.req_date : '') + '</p></div>' +
       originBadge(s.origin) +
-      '<div class="row-actions"><button class="btn btn-sm btn-danger" onclick="deleteSale(' + s.id + ')">Eliminar</button></div>' +
+      '<div class="row-actions">' + editBtn('editSale', s.id) + delBtn('deleteSale', s.id) + '</div>' +
       '</div>';
   }).join('');
+}
+function editSale(id) {
+  var s = cache.sales.find(function(x){ return x.id === id; });
+  if (!s) return;
+  editing.sale = id;
+  populateSel('s-prod', cache.products, 'name');
+  setVal('s-client', s.client); setSelVal('s-prod', s.prod_id);
+  setVal('s-rdate', s.req_date); setVal('s-ddate', s.del_date);
+  setVal('s-amount', s.amount); setSelVal('s-origin', s.origin);
+  setVal('s-notes', s.notes);
+  calcDays();
+  var form = document.getElementById('sale-form');
+  form.style.display = 'block';
+  var p = form.querySelector('p[data-form-title]');
+  if (p) p.textContent = 'Editando venta: ' + s.client;
+  var btn = form.querySelector('button.btn-primary');
+  if (btn) btn.textContent = 'Actualizar venta';
+  form.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 async function saveSale() {
   var client = document.getElementById('s-client').value.trim();
@@ -1029,13 +1203,21 @@ async function saveSale() {
   var r = document.getElementById('s-rdate').value;
   var d = document.getElementById('s-ddate').value;
   var days = (r && d) ? Math.round((new Date(d) - new Date(r)) / 86400000) : null;
+  var data = { client, prod_id: document.getElementById('s-prod').value ? parseInt(document.getElementById('s-prod').value) : null, req_date: r, del_date: d, days, amount: parseFloat(document.getElementById('s-amount').value)||null, origin: document.getElementById('s-origin').value, notes: document.getElementById('s-notes').value };
   try {
-    await sbFetch('sales', 'POST', { client, prod_id: document.getElementById('s-prod').value ? parseInt(document.getElementById('s-prod').value) : null, req_date: r, del_date: d, days, amount: parseFloat(document.getElementById('s-amount').value)||null, origin: document.getElementById('s-origin').value, notes: document.getElementById('s-notes').value });
-    clearFields(['s-client','s-amount','s-notes','s-ddate']);
+    if (editing.sale) {
+      await sbFetch('sales', 'PATCH', data, 'id=eq.' + editing.sale);
+      editing.sale = null;
+      toast('✓ Venta actualizada');
+    } else {
+      await sbFetch('sales', 'POST', data);
+      toast('✓ Venta registrada');
+    }
+    clearFields(['s-client','s-amount','s-notes','s-ddate','s-rdate']);
     document.getElementById('s-days').textContent = '—';
-    toggleForm('sale-form');
+    document.getElementById('sale-form').style.display = 'none';
+    resetFormTitle('sale-form');
     await loadSales();
-    toast('✓ Venta registrada');
   } catch(e) { toast('Error al guardar', true); }
 }
 async function deleteSale(id) {
@@ -1043,17 +1225,17 @@ async function deleteSale(id) {
   await del('sales', id); await loadSales(); toast('Venta eliminada');
 }
 
+// =====================
 // DASHBOARD
+// =====================
 async function renderDash() {
   try {
     var [machines, materials, products, tests, sales] = await Promise.all([
       getAll('machines'), getAll('materials'), getAll('products'), getAll('tests'), getAll('sales')
     ]);
     cache = { machines, materials, products, tests, sales };
-
     var totalRev = sales.reduce(function(a,s){ return a + parseFloat(s.amount||0); }, 0);
     var avgDays = sales.length ? Math.round(sales.reduce(function(a,s){ return a+(s.days||0); },0)/sales.length) : 0;
-
     document.getElementById('dash-stats').innerHTML = [
       { val: sales.length, lbl: 'Ventas totales', icon: '🌿' },
       { val: totalRev.toFixed(2) + ' €', lbl: 'Facturación', icon: '💰' },
@@ -1062,7 +1244,6 @@ async function renderDash() {
     ].map(function(s){
       return '<div class="stat-card"><div class="icon">' + s.icon + '</div><div class="val">' + s.val + '</div><div class="lbl">' + s.lbl + '</div></div>';
     }).join('');
-
     var last = sales.slice(0, 5);
     var salesEl = document.getElementById('dash-sales');
     if (!last.length) { salesEl.innerHTML = '<div class="empty" style="padding:24px">Sin ventas aún</div>'; }
@@ -1072,7 +1253,6 @@ async function renderDash() {
         return '<div class="list-item" style="padding:11px 14px"><div class="info"><p class="item-name" style="font-size:13px">' + s.client + (prod?' — '+prod.name:'') + '</p><p class="item-meta" style="font-size:11px">' + (s.amount||'—') + ' €</p></div>' + originBadge(s.origin) + '</div>';
       }).join('');
     }
-
     var origins = { instagram:0, wallapop:0, direct:0, known:0, search:0 };
     sales.forEach(function(s){ if(origins[s.origin]!==undefined) origins[s.origin]++; });
     var labels = { instagram:'📷 Instagram', wallapop:'🏷️ Wallapop', direct:'🤝 Directa', known:'👥 Conocido', search:'🔍 Buscada' };
@@ -1086,11 +1266,9 @@ async function renderDash() {
   }
 }
 
-checkStatus();
-renderDash();
-loadMachines();
-
-// --- TABLA DE PARÁMETROS FINALES ---
+// =====================
+// PARAMS TABLE
+// =====================
 var PARAM_ROWS = [
   { key: 'texto_grueso',   label: 'Texto grueso' },
   { key: 'texto_fino',     label: 'Texto fino' },
@@ -1099,7 +1277,6 @@ var PARAM_ROWS = [
   { key: 'corte',          label: 'Corte' },
   { key: 'grabado_foto',   label: 'Grabado foto/sombra' },
 ];
-
 var paramsCache = {};
 
 async function loadParamsTable() {
@@ -1114,7 +1291,7 @@ async function loadParamsTable() {
     paramsCache[matId] = byKey;
     renderParamsTable(matId);
   } catch(e) {
-    wrap.innerHTML = '<div style="color:var(--rust);padding:16px;font-size:13px">Error al cargar. Asegurate de haber ejecutado el SQL en Supabase.</div>';
+    wrap.innerHTML = '<div style="color:var(--rust);padding:16px;font-size:13px">Error al cargar.</div>';
   }
 }
 
@@ -1142,7 +1319,7 @@ function renderParamsTable(matId) {
       '<thead><tr><th>Tipo de grabado</th><th>Velocidad (mm/min)</th><th>Potencia (%)</th><th>Pasadas</th><th>Resultado</th><th>Notas</th></tr></thead>' +
       '<tbody>' + rows + '</tbody>' +
     '</table>' +
-    '<div class="params-save-row"><button class="btn btn-primary" onclick="saveParamsTable()">Guardar tabla de parametros</button></div>';
+    '<div class="params-save-row"><button class="btn btn-primary" onclick="saveParamsTable()">Guardar tabla de parámetros</button></div>';
 }
 
 async function saveParamsTable() {
@@ -1152,14 +1329,7 @@ async function saveParamsTable() {
   try {
     for (var i = 0; i < PARAM_ROWS.length; i++) {
       var row = PARAM_ROWS[i];
-      var payload = {
-        mat_id: parseInt(matId), row_key: row.key,
-        speed: document.getElementById('p_speed_' + row.key).value || null,
-        power: document.getElementById('p_power_' + row.key).value || null,
-        passes: document.getElementById('p_passes_' + row.key).value || null,
-        result: document.getElementById('p_result_' + row.key).value || null,
-        notes: document.getElementById('p_notes_' + row.key).value || null
-      };
+      var payload = { mat_id: parseInt(matId), row_key: row.key, speed: document.getElementById('p_speed_' + row.key).value || null, power: document.getElementById('p_power_' + row.key).value || null, passes: document.getElementById('p_passes_' + row.key).value || null, result: document.getElementById('p_result_' + row.key).value || null, notes: document.getElementById('p_notes_' + row.key).value || null };
       var existing = byKey[row.key];
       if (existing && existing.id) {
         await sbFetch('material_params', 'PATCH', payload, 'id=eq.' + existing.id);
@@ -1169,11 +1339,9 @@ async function saveParamsTable() {
       }
     }
     paramsCache[matId] = byKey;
-    toast('Tabla de parametros guardada');
+    toast('Tabla de parámetros guardada');
     await loadParamsTable();
-  } catch(e) {
-    toast('Error al guardar: ' + e.message, true);
-  }
+  } catch(e) { toast('Error al guardar: ' + e.message, true); }
 }
 
 var _origLoadTests = loadTests;
@@ -1183,6 +1351,9 @@ loadTests = async function() {
   document.getElementById('params-table-wrap').innerHTML = '';
 };
 
+checkStatus();
+renderDash();
+loadMachines();
 </script>
 </body>
 </html>
