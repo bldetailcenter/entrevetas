@@ -503,6 +503,17 @@ main { flex: 1; padding: 32px; max-width: 980px; margin: 0 auto; width: 100%; }
 .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
 .modal-divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
 .modal-footer { padding: 16px 28px 24px; display: flex; gap: 10px; }
+
+.mat-row {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--cream2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 8px 10px; margin-bottom: 6px;
+}
+.mat-row select { flex:2; font-family:'Jost',sans-serif; font-size:13px; padding:6px 8px; border-radius:6px; border:1px solid var(--border2); background:white; color:var(--text); }
+.mat-row input { flex:1; font-family:'Jost',sans-serif; font-size:13px; padding:6px 8px; border-radius:6px; border:1px solid var(--border2); background:white; color:var(--text); min-width:0; }
+.mat-row .mat-cost-label { font-size:12px; color:var(--moss); font-family:'Playfair Display',serif; font-style:italic; white-space:nowrap; min-width:60px; text-align:right; }
+.mat-row .btn-remove { padding:4px 8px; font-size:14px; border:none; background:none; color:var(--text3); cursor:pointer; flex-shrink:0; }
+.mat-row .btn-remove:hover { color:var(--rust); }
 </style>
 </head>
 <body>
@@ -674,14 +685,15 @@ main { flex: 1; padding: 32px; max-width: 980px; margin: 0 auto; width: 100%; }
   </div>
   <div id="prod-form" class="card" style="display:none;margin-bottom:24px">
     <p data-form-title style="font-family:'Playfair Display',serif;font-size:17px;margin-bottom:18px;color:var(--bark)">data-form-title>Nuevo producto</p>
-    <div class="grid-2 form-section">
-      <div class="field"><label>Nombre del producto</label><input id="p-name" placeholder="Caja personalizada DM reciclado"></div>
-      <div class="field"><label>Material principal</label><select id="p-mat" onchange="calcMatCost()"><option value="">Seleccionar...</option></select></div>
-    </div>
-    <div class="grid-3 form-section">
-      <div class="field"><label>Cantidad material (cm²)</label><input id="p-qty" type="number" placeholder="600" oninput="calcMatCost()"></div>
-      <div class="field"><label>Coste de material (€)</label><div class="computed" id="p-matcost">—</div></div>
-      <div class="field"><label>Precio sugerido (€)</label><div class="computed" id="p-suggested">—</div></div>
+    <div class="form-section">
+      <div class="field" style="margin-bottom:14px"><label>Nombre del producto</label><input id="p-name" placeholder="Caja personalizada DM reciclado"></div>
+      <label style="font-size:10px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);display:block;margin-bottom:8px">Materiales utilizados</label>
+      <div id="p-mat-list"></div>
+      <button class="btn btn-sm" type="button" onclick="addMatRow()" style="margin-top:8px;border-style:dashed;color:var(--moss);border-color:var(--moss)">+ Añadir material</button>
+      <div style="display:flex;gap:16px;margin-top:14px;flex-wrap:wrap">
+        <div class="field" style="min-width:140px"><label>Coste total material (€)</label><div class="computed" id="p-matcost">—</div></div>
+        <div class="field" style="min-width:140px"><label>Precio sugerido ×3 (€)</label><div class="computed" id="p-suggested">—</div></div>
+      </div>
     </div>
     <div class="grid-3 form-section">
       <div class="field"><label>Tiempo láser (min)</label><input id="p-ltime" type="number" placeholder="25"></div>
@@ -835,7 +847,7 @@ function toggleForm(id) {
   }
   el.style.display = 'block';
   if (id === 'test-form') { populateSel('t-mat', cache.materials, 'name'); populateSel('t-machine', cache.machines, 'name'); }
-  if (id === 'prod-form') populateSel('p-mat', cache.materials, 'name');
+  if (id === 'prod-form') { clearMatRows(); if(document.getElementById('p-mat-list').children.length===0) addMatRow(); }
   if (id === 'sale-form') { populateSel('s-prod', cache.products, 'name'); if (!document.getElementById('s-rdate').value) document.getElementById('s-rdate').value = new Date().toISOString().split('T')[0]; }
 }
 
@@ -1122,17 +1134,79 @@ async function deleteTest(id) {
 // =====================
 // PRODUCTS
 // =====================
+// Multi-material rows
+var matRowCount = 0;
+
+function addMatRow(matId, qty) {
+  matRowCount++;
+  var rid = 'mr' + matRowCount;
+  var opts = '<option value="">Seleccionar...</option>' +
+    cache.materials.map(function(m){ return '<option value="' + m.id + '"' + (matId==m.id?' selected':'') + '>' + m.name + '</option>'; }).join('');
+  var div = document.createElement('div');
+  div.className = 'mat-row';
+  div.id = rid;
+  div.innerHTML =
+    '<select onchange="calcMatCost()">' + opts + '</select>' +
+    '<input type="number" placeholder="cm²" value="' + (qty||'') + '" oninput="calcMatCost()" min="0">' +
+    '<span class="mat-cost-label" id="' + rid + '-cost">—</span>' +
+    '<button class="btn-remove" onclick="removeMatRow('' + rid + '')" title="Quitar">✕</button>';
+  document.getElementById('p-mat-list').appendChild(div);
+  calcMatCost();
+}
+
+function removeMatRow(rid) {
+  var el = document.getElementById(rid);
+  if (el) el.remove();
+  calcMatCost();
+}
+
 function calcMatCost() {
-  var matId = document.getElementById('p-mat').value;
-  var qty = parseFloat(document.getElementById('p-qty').value)||0;
-  var mat = cache.materials.find(function(m){ return m.id == matId; });
+  var rows = document.querySelectorAll('#p-mat-list .mat-row');
+  var total = 0;
+  rows.forEach(function(row) {
+    var sel = row.querySelector('select');
+    var inp = row.querySelector('input');
+    var lbl = row.querySelector('.mat-cost-label');
+    var mat = cache.materials.find(function(m){ return m.id == sel.value; });
+    var qty = parseFloat(inp.value)||0;
+    if (mat && mat.ppm2 && qty) {
+      var cost = parseFloat(mat.ppm2) * qty / 10000;
+      total += cost;
+      lbl.textContent = cost.toFixed(2) + ' €';
+    } else {
+      lbl.textContent = '—';
+    }
+  });
   var costEl = document.getElementById('p-matcost');
   var sugEl = document.getElementById('p-suggested');
-  if (mat && mat.ppm2 && qty) {
-    var cost = parseFloat(mat.ppm2) * qty / 10000;
-    costEl.textContent = cost.toFixed(2) + ' €';
-    sugEl.textContent = (cost * 3).toFixed(2) + ' € (×3)';
-  } else { costEl.textContent = '—'; sugEl.textContent = '—'; }
+  if (total > 0) {
+    costEl.textContent = total.toFixed(2) + ' €';
+    sugEl.textContent = (total * 3).toFixed(2) + ' €';
+  } else {
+    costEl.textContent = '—';
+    sugEl.textContent = '—';
+  }
+}
+
+function getMatRows() {
+  var rows = document.querySelectorAll('#p-mat-list .mat-row');
+  var result = [];
+  rows.forEach(function(row) {
+    var sel = row.querySelector('select');
+    var inp = row.querySelector('input');
+    var mat = cache.materials.find(function(m){ return m.id == sel.value; });
+    var qty = parseFloat(inp.value)||0;
+    if (sel.value && qty) {
+      var cost = (mat && mat.ppm2) ? (parseFloat(mat.ppm2)*qty/10000).toFixed(2) : null;
+      result.push({ mat_id: parseInt(sel.value), qty: qty, cost: cost });
+    }
+  });
+  return result;
+}
+
+function clearMatRows() {
+  document.getElementById('p-mat-list').innerHTML = '';
+  matRowCount = 0;
 }
 async function loadProducts() {
   try {
@@ -1158,10 +1232,16 @@ function editProduct(id) {
   if (!p) return;
   editing.product = id;
   populateSel('p-mat', cache.materials, 'name');
-  setVal('p-name', p.name); setSelVal('p-mat', p.mat_id);
-  setVal('p-qty', p.qty); setVal('p-ltime', p.laser_time);
+  setVal('p-name', p.name);
+  setVal('p-ltime', p.laser_time);
   setVal('p-atime', p.assembly_time); setVal('p-desc', p.description);
   setVal('p-saleprice', p.sale_price);
+  clearMatRows();
+  var mats = [];
+  try { mats = p.materials_json ? JSON.parse(p.materials_json) : []; } catch(e){}
+  if (!mats.length && p.mat_id) mats = [{ mat_id: p.mat_id, qty: p.qty }];
+  if (mats.length) { mats.forEach(function(r){ addMatRow(r.mat_id, r.qty); }); }
+  else { addMatRow(); }
   calcMatCost();
   if (p.photo) document.getElementById('p-photo-prev').innerHTML = '<img src="' + p.photo + '" style="max-height:100px;border-radius:8px;margin-bottom:4px"><br><small style="color:var(--text3);font-size:11px">Foto actual — sube una nueva para reemplazarla</small>';
   var form = document.getElementById('prod-form');
@@ -1175,13 +1255,13 @@ function editProduct(id) {
 async function saveProduct() {
   var name = document.getElementById('p-name').value.trim();
   if (!name) { toast('Introduce el nombre del producto', true); return; }
-  var matId = document.getElementById('p-mat').value;
-  var qty = parseFloat(document.getElementById('p-qty').value)||0;
-  var mat = cache.materials.find(function(m){ return m.id == matId; });
-  var matCost = (mat && mat.ppm2 && qty) ? (parseFloat(mat.ppm2) * qty / 10000).toFixed(2) : null;
+  var matRows = getMatRows();
+  var totalCost = matRows.reduce(function(a,r){ return a+(parseFloat(r.cost)||0); },0);
+  var matCost = totalCost > 0 ? totalCost.toFixed(2) : null;
+  var firstMatId = matRows.length ? matRows[0].mat_id : null;
   var newPhoto = await getImgData('p-photo');
   var salePrice = parseFloat(document.getElementById('p-saleprice').value)||null;
-  var data = { name, mat_id: matId ? parseInt(matId) : null, qty, mat_cost: matCost, laser_time: document.getElementById('p-ltime').value, assembly_time: document.getElementById('p-atime').value, description: document.getElementById('p-desc').value, sale_price: salePrice };
+  var data = { name, mat_id: firstMatId, materials_json: JSON.stringify(matRows), mat_cost: matCost, laser_time: document.getElementById('p-ltime').value, assembly_time: document.getElementById('p-atime').value, description: document.getElementById('p-desc').value, sale_price: salePrice };
   if (newPhoto) data.photo = newPhoto;
   try {
     if (editing.product) {
@@ -1192,7 +1272,8 @@ async function saveProduct() {
       await sbFetch('products', 'POST', data);
       toast('✓ Producto guardado');
     }
-    clearFields(['p-name','p-qty','p-ltime','p-atime','p-desc','p-saleprice']);
+    clearFields(['p-name','p-ltime','p-atime','p-desc','p-saleprice']);
+    clearMatRows();
     document.getElementById('p-photo').value = '';
     document.getElementById('p-photo-prev').innerHTML = '';
     document.getElementById('p-matcost').textContent = '—';
@@ -1485,13 +1566,20 @@ function showTest(id) {
 function showProduct(id) {
   var p = cache.products.find(function(x){ return x.id===id; });
   if (!p) return;
-  var mat = cache.materials.find(function(m){ return m.id==p.mat_id; });
+  var mats = []; try { mats = p.materials_json ? JSON.parse(p.materials_json) : []; } catch(e){}
+  if (!mats.length && p.mat_id) mats = [{ mat_id: p.mat_id, qty: p.qty }];
+  var matsHtml = mats.map(function(r){
+    var m = cache.materials.find(function(x){ return x.id==r.mat_id; });
+    var cost = (m && m.ppm2 && r.qty) ? (parseFloat(m.ppm2)*r.qty/10000).toFixed(2)+' €' : '—';
+    return '<div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid var(--border)">' +
+      '<span>' + (m?m.name:'—') + ' · ' + (r.qty||'—') + ' cm²</span>' +
+      '<span style="color:var(--moss);font-style:italic">' + cost + '</span></div>';
+  }).join('');
   var body = (p.photo ? '<img class="modal-photo" src="' + p.photo + '">' : '') +
-    mf('Material', mat?mat.name:null) +
-    mfGrid([['Coste material', p.mat_cost ? p.mat_cost+' €' : null],['Precio de venta', p.sale_price ? p.sale_price+' €' : null]]) +
+    '<div class="modal-field"><div class="modal-field-label">Materiales</div>' + (matsHtml||'—') + '</div>' +
+    mfGrid([['Coste total material', p.mat_cost ? p.mat_cost+' €' : null],['Precio de venta', p.sale_price ? p.sale_price+' €' : null]]) +
     '<hr class="modal-divider">' +
     mfGrid([['Tiempo láser', p.laser_time ? p.laser_time+' min' : null],['Tiempo ensamblaje', p.assembly_time ? p.assembly_time+' min' : null]]) +
-    mf('Material usado', p.qty ? p.qty+' cm²' : null) +
     (p.description ? '<hr class="modal-divider">' + mf('Descripción', p.description) : '');
   openModal(p.name, 'Ficha de producto', body, 'editProduct', id);
 }
