@@ -1218,11 +1218,11 @@ function addMatRow(matId, qty) {
   div.className = 'mat-row';
   div.id = rid;
   div.innerHTML =
-    '<select onchange="onMatRowChange('' + rid + '')">' + opts + '</select>' +
+    '<select onchange="onMatRowChange(\"' + rid + '\")">'+opts+'</select>' +
     '<input type="number" placeholder="' + unit + '" value="' + (qty||'') + '" oninput="calcMatCost()" min="0">' +
     '<span class="mat-row-unit">' + unit + '</span>' +
     '<span class="mat-cost-label" id="' + rid + '-cost">—</span>' +
-    '<button class="btn-remove" onclick="removeMatRow('' + rid + '')" title="Quitar">✕</button>';
+    '<button class="btn-remove" onclick="removeMatRow(\"' + rid + '\")">✕</button>';
   document.getElementById('p-mat-list').appendChild(div);
   calcMatCost();
 }
