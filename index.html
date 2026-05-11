@@ -332,6 +332,8 @@ main { flex: 1; padding: 32px; max-width: 980px; margin: 0 auto; width: 100%; }
 .b-direct    { background: #ddf0dd; color: #1a5020; border: 1px solid #80c080; }
 .b-known     { background: #d8eaf5; color: #1a5070; border: 1px solid #90c0e0; }
 .b-search    { background: #ede4f5; color: #4a2070; border: 1px solid #c0a0e0; }
+.b-aux       { background: #e8ece0; color: #3a4a20; border: 1px solid #a0b070; }
+.mat-row-unit { font-size:11px; color:var(--text3); white-space:nowrap; }
 
 /* STAT CARDS */
 .stat-card {
@@ -599,24 +601,51 @@ main { flex: 1; padding: 32px; max-width: 980px; margin: 0 auto; width: 100%; }
   <div id="mat-form" class="card" style="display:none;margin-bottom:24px">
     <p data-form-title style="font-family:'Playfair Display',serif;font-size:17px;margin-bottom:18px;color:var(--bark)">data-form-title>Nuevo material</p>
     <div class="grid-2 form-section">
-      <div class="field"><label>Nombre del material</label><input id="mat-name" placeholder="DM 3mm natural reciclado"></div>
+      <div class="field"><label>Nombre del material</label><input id="mat-name" placeholder="DM 3mm / Anilla 20mm / Hilo macramé"></div>
       <div class="field"><label>Tipo</label>
-        <select id="mat-type"><option value="wood">Madera</option><option value="acrylic">Acrílico</option><option value="metal">Metal</option><option value="other">Otros</option></select>
+        <select id="mat-type" onchange="toggleMatType()">
+          <option value="wood">Madera</option>
+          <option value="acrylic">Acrílico</option>
+          <option value="metal">Metal</option>
+          <option value="other">Otros</option>
+          <option value="auxiliary">🔩 Auxiliar (anillas, hilos...)</option>
+        </select>
       </div>
     </div>
-    <div class="grid-3 form-section">
-      <div class="field"><label>Grosor (mm)</label><input id="mat-thick" type="number" placeholder="3"></div>
-      <div class="field"><label>Marca / Proveedor</label><input id="mat-brand" placeholder="Leroy Merlin"></div>
-      <div class="field"><label>Medidas de venta</label><input id="mat-size" placeholder="600×400mm"></div>
+    <div id="mat-sheet-fields">
+      <div class="grid-3 form-section">
+        <div class="field"><label>Grosor (mm)</label><input id="mat-thick" type="number" placeholder="3"></div>
+        <div class="field"><label>Marca / Proveedor</label><input id="mat-brand" placeholder="Leroy Merlin"></div>
+        <div class="field"><label>Medidas de venta</label><input id="mat-size" placeholder="600×400mm"></div>
+      </div>
+      <div class="grid-3 form-section">
+        <div class="field"><label>Precio por pieza (€)</label><input id="mat-price" type="number" step="0.01" placeholder="4.50" oninput="calcPpm2()"></div>
+        <div class="field"><label>Ancho (cm)</label><input id="mat-w" type="number" placeholder="60" oninput="calcPpm2()"></div>
+        <div class="field"><label>Alto (cm)</label><input id="mat-h" type="number" placeholder="40" oninput="calcPpm2()"></div>
+      </div>
+      <div class="grid-2 form-section">
+        <div class="field"><label>€ / m² (calculado)</label><div class="computed" id="mat-ppm2">—</div></div>
+        <div class="field"><label>Fotografía</label><input type="file" id="mat-photo" accept="image/*" onchange="previewImg('mat-photo','mat-photo-prev')"></div>
+      </div>
     </div>
-    <div class="grid-3 form-section">
-      <div class="field"><label>Precio por pieza (€)</label><input id="mat-price" type="number" step="0.01" placeholder="4.50" oninput="calcPpm2()"></div>
-      <div class="field"><label>Ancho (cm)</label><input id="mat-w" type="number" placeholder="60" oninput="calcPpm2()"></div>
-      <div class="field"><label>Alto (cm)</label><input id="mat-h" type="number" placeholder="40" oninput="calcPpm2()"></div>
-    </div>
-    <div class="grid-2 form-section">
-      <div class="field"><label>€ / m² (calculado)</label><div class="computed" id="mat-ppm2">—</div></div>
-      <div class="field"><label>Fotografía del material</label><input type="file" id="mat-photo" accept="image/*" onchange="previewImg('mat-photo','mat-photo-prev')"></div>
+    <div id="mat-aux-fields" style="display:none">
+      <div class="grid-3 form-section">
+        <div class="field"><label>Marca / Proveedor</label><input id="mat-aux-brand" placeholder="Amazon, Mercería..."></div>
+        <div class="field"><label>Precio por unidad (€)</label><input id="mat-aux-price" type="number" step="0.001" placeholder="0.05"></div>
+        <div class="field"><label>Unidad</label>
+          <select id="mat-aux-unit">
+            <option value="ud">Unidad (ud)</option>
+            <option value="m">Metro (m)</option>
+            <option value="cm">Centímetro (cm)</option>
+            <option value="g">Gramo (g)</option>
+            <option value="ml">Mililitro (ml)</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid-2 form-section">
+        <div class="field"><label>Foto (opcional)</label><input type="file" id="mat-aux-photo" accept="image/*" onchange="previewImg('mat-aux-photo','mat-photo-prev')"></div>
+        <div class="field"><label>Lugar de compra / link</label><input id="mat-aux-link" placeholder="https://..."></div>
+      </div>
     </div>
     <div id="mat-photo-prev" style="margin-bottom:16px"></div>
     <div class="field form-section"><label>Notas</label><textarea id="mat-notes" placeholder="Color, acabado, origen, si es reciclado..."></textarea></div>
@@ -899,8 +928,8 @@ function setVal(id, val) { var el = document.getElementById(id); if(el && val !=
 function setSelVal(id, val) { var el = document.getElementById(id); if(el && val != null) el.value = val; }
 
 function typeBadge(t) {
-  var map = { wood:'b-wood', acrylic:'b-acrylic', metal:'b-metal', other:'b-other' };
-  var lbl = { wood:'🪵 Madera', acrylic:'🔷 Acrílico', metal:'⚙️ Metal', other:'♻️ Otros' };
+  var map = { wood:'b-wood', acrylic:'b-acrylic', metal:'b-metal', other:'b-other', auxiliary:'b-aux' };
+  var lbl = { wood:'🪵 Madera', acrylic:'🔷 Acrílico', metal:'⚙️ Metal', other:'♻️ Otros', auxiliary:'🔩 Auxiliar' };
   return '<span class="badge ' + (map[t]||'b-other') + '">' + (lbl[t]||t) + '</span>';
 }
 function statusBadge(s) {
@@ -986,6 +1015,12 @@ async function deleteMachine(id) {
 // =====================
 // MATERIALS
 // =====================
+function toggleMatType() {
+  var isAux = document.getElementById('mat-type').value === 'auxiliary';
+  document.getElementById('mat-sheet-fields').style.display = isAux ? 'none' : 'block';
+  document.getElementById('mat-aux-fields').style.display = isAux ? 'block' : 'none';
+}
+
 function calcPpm2() {
   var price = parseFloat(document.getElementById('mat-price').value)||0;
   var w = parseFloat(document.getElementById('mat-w').value)||0;
@@ -1003,7 +1038,7 @@ function renderMaterials() {
   el.innerHTML = cache.materials.map(function(m){
     return '<div class="list-item" style="cursor:pointer" onclick="showMaterial(' + m.id + ')">' +
       imgOrPlaceholder(m.photo) +
-      '<div class="info"><p class="item-name">' + m.name + '</p><p class="item-meta">' + (m.brand||'') + ' · ' + (m.thick||'—') + 'mm · ' + (m.size||'—') + (m.ppm2 ? ' · <strong>' + m.ppm2 + ' €/m²</strong>' : '') + '</p></div>' +
+      '<div class="info"><p class="item-name">' + m.name + '</p><p class="item-meta">' + (m.type==='auxiliary' ? (m.brand||'') + (m.price_per_unit ? ' · ' + parseFloat(m.price_per_unit).toFixed(3) + ' €/' + (m.unit||'ud') : '') : (m.brand||'') + ' · ' + (m.thick||'—') + 'mm · ' + (m.size||'—') + (m.ppm2 ? ' · <strong>' + m.ppm2 + ' €/m²</strong>' : '')) + '</p></div>' +
       typeBadge(m.type) +
       '<div class="row-actions">' + editBtn('editMaterial', m.id) + delBtn('deleteMaterial', m.id) + '</div>' +
       '</div>';
@@ -1013,10 +1048,18 @@ function editMaterial(id) {
   var m = cache.materials.find(function(x){ return x.id === id; });
   if (!m) return;
   editing.material = id;
-  setVal('mat-name', m.name); setSelVal('mat-type', m.type); setVal('mat-thick', m.thick);
-  setVal('mat-brand', m.brand); setVal('mat-size', m.size); setVal('mat-price', m.price);
-  setVal('mat-w', m.w); setVal('mat-h', m.h); setVal('mat-notes', m.notes);
-  calcPpm2();
+  setVal('mat-name', m.name); setSelVal('mat-type', m.type); setVal('mat-notes', m.notes);
+  toggleMatType();
+  if (m.type === 'auxiliary') {
+    setVal('mat-aux-brand', m.brand);
+    setVal('mat-aux-price', m.price_per_unit);
+    setSelVal('mat-aux-unit', m.unit||'ud');
+    setVal('mat-aux-link', m.size);
+  } else {
+    setVal('mat-thick', m.thick); setVal('mat-brand', m.brand); setVal('mat-size', m.size);
+    setVal('mat-price', m.price); setVal('mat-w', m.w); setVal('mat-h', m.h);
+    calcPpm2();
+  }
   if (m.photo) document.getElementById('mat-photo-prev').innerHTML = '<img src="' + m.photo + '" style="max-height:100px;border-radius:8px;margin-bottom:4px"><br><small style="color:var(--text3);font-size:11px">Foto actual — sube una nueva para reemplazarla</small>';
   var form = document.getElementById('mat-form');
   form.style.display = 'block';
@@ -1029,13 +1072,28 @@ function editMaterial(id) {
 async function saveMaterial() {
   var name = document.getElementById('mat-name').value.trim();
   if (!name) { toast('Introduce el nombre del material', true); return; }
-  var price = parseFloat(document.getElementById('mat-price').value)||0;
-  var w = parseFloat(document.getElementById('mat-w').value)||0;
-  var h = parseFloat(document.getElementById('mat-h').value)||0;
-  var ppm2 = (price && w && h) ? (price / ((w*h)/10000)).toFixed(2) : null;
-  var newPhoto = await getImgData('mat-photo');
-  var data = { name, type: document.getElementById('mat-type').value, thick: document.getElementById('mat-thick').value, brand: document.getElementById('mat-brand').value, size: document.getElementById('mat-size').value, price, w, h, ppm2, notes: document.getElementById('mat-notes').value };
-  if (newPhoto) data.photo = newPhoto;
+  var type = document.getElementById('mat-type').value;
+  var isAux = type === 'auxiliary';
+  var data = { name, type, notes: document.getElementById('mat-notes').value };
+  if (isAux) {
+    data.brand = document.getElementById('mat-aux-brand').value;
+    data.price_per_unit = parseFloat(document.getElementById('mat-aux-price').value)||null;
+    data.unit = document.getElementById('mat-aux-unit').value;
+    data.size = document.getElementById('mat-aux-link').value;
+    var auxPhoto = await getImgData('mat-aux-photo');
+    if (auxPhoto) data.photo = auxPhoto;
+  } else {
+    var price = parseFloat(document.getElementById('mat-price').value)||0;
+    var w = parseFloat(document.getElementById('mat-w').value)||0;
+    var h = parseFloat(document.getElementById('mat-h').value)||0;
+    data.thick = document.getElementById('mat-thick').value;
+    data.brand = document.getElementById('mat-brand').value;
+    data.size = document.getElementById('mat-size').value;
+    data.price = price; data.w = w; data.h = h;
+    data.ppm2 = (price && w && h) ? (price/((w*h)/10000)).toFixed(2) : null;
+    var sheetPhoto = await getImgData('mat-photo');
+    if (sheetPhoto) data.photo = sheetPhoto;
+  }
   try {
     if (editing.material) {
       await sbFetch('materials', 'PATCH', data, 'id=eq.' + editing.material);
@@ -1045,10 +1103,14 @@ async function saveMaterial() {
       await sbFetch('materials', 'POST', data);
       toast('✓ Material guardado');
     }
-    clearFields(['mat-name','mat-thick','mat-brand','mat-size','mat-price','mat-w','mat-h','mat-notes']);
+    clearFields(['mat-name','mat-thick','mat-brand','mat-size','mat-price','mat-w','mat-h','mat-notes','mat-aux-brand','mat-aux-price','mat-aux-link']);
     document.getElementById('mat-photo').value = '';
+    document.getElementById('mat-aux-photo').value = '';
     document.getElementById('mat-photo-prev').innerHTML = '';
     document.getElementById('mat-ppm2').textContent = '—';
+    document.getElementById('mat-sheet-fields').style.display = 'block';
+    document.getElementById('mat-aux-fields').style.display = 'none';
+    document.getElementById('mat-type').value = 'wood';
     document.getElementById('mat-form').style.display = 'none';
     resetFormTitle('mat-form');
     await loadMaterials();
@@ -1137,20 +1199,41 @@ async function deleteTest(id) {
 // Multi-material rows
 var matRowCount = 0;
 
+function matUnitLabel(m) {
+  if (!m || m.type !== 'auxiliary') return 'cm²';
+  return m.unit || 'ud';
+}
+
 function addMatRow(matId, qty) {
   matRowCount++;
   var rid = 'mr' + matRowCount;
-  var opts = '<option value="">Seleccionar...</option>' +
-    cache.materials.map(function(m){ return '<option value="' + m.id + '"' + (matId==m.id?' selected':'') + '>' + m.name + '</option>'; }).join('');
+  var sheets = cache.materials.filter(function(m){ return m.type !== 'auxiliary'; });
+  var auxs = cache.materials.filter(function(m){ return m.type === 'auxiliary'; });
+  var opts = '<option value="">Seleccionar...</option>';
+  if (sheets.length) opts += '<optgroup label="Planchas / láminas">' + sheets.map(function(m){ return '<option value="' + m.id + '"' + (matId==m.id?' selected':'') + '>' + m.name + '</option>'; }).join('') + '</optgroup>';
+  if (auxs.length) opts += '<optgroup label="Auxiliares">' + auxs.map(function(m){ return '<option value="' + m.id + '"' + (matId==m.id?' selected':'') + '>' + m.name + '</option>'; }).join('') + '</optgroup>';
+  var selMat = matId ? cache.materials.find(function(m){ return m.id==matId; }) : null;
+  var unit = selMat ? matUnitLabel(selMat) : 'cm²';
   var div = document.createElement('div');
   div.className = 'mat-row';
   div.id = rid;
   div.innerHTML =
-    '<select onchange="calcMatCost()">' + opts + '</select>' +
-    '<input type="number" placeholder="cm²" value="' + (qty||'') + '" oninput="calcMatCost()" min="0">' +
+    '<select onchange="onMatRowChange('' + rid + '')">' + opts + '</select>' +
+    '<input type="number" placeholder="' + unit + '" value="' + (qty||'') + '" oninput="calcMatCost()" min="0">' +
+    '<span class="mat-row-unit">' + unit + '</span>' +
     '<span class="mat-cost-label" id="' + rid + '-cost">—</span>' +
     '<button class="btn-remove" onclick="removeMatRow('' + rid + '')" title="Quitar">✕</button>';
   document.getElementById('p-mat-list').appendChild(div);
+  calcMatCost();
+}
+
+function onMatRowChange(rid) {
+  var row = document.getElementById(rid);
+  var sel = row.querySelector('select');
+  var mat = cache.materials.find(function(m){ return m.id == sel.value; });
+  var unit = mat ? matUnitLabel(mat) : 'cm²';
+  row.querySelector('.mat-row-unit').textContent = unit;
+  row.querySelector('input').placeholder = unit;
   calcMatCost();
 }
 
@@ -1169,13 +1252,13 @@ function calcMatCost() {
     var lbl = row.querySelector('.mat-cost-label');
     var mat = cache.materials.find(function(m){ return m.id == sel.value; });
     var qty = parseFloat(inp.value)||0;
-    if (mat && mat.ppm2 && qty) {
-      var cost = parseFloat(mat.ppm2) * qty / 10000;
-      total += cost;
-      lbl.textContent = cost.toFixed(2) + ' €';
-    } else {
-      lbl.textContent = '—';
+    var cost = 0;
+    if (mat && qty) {
+      if (mat.type === 'auxiliary' && mat.price_per_unit) cost = parseFloat(mat.price_per_unit) * qty;
+      else if (mat.ppm2) cost = parseFloat(mat.ppm2) * qty / 10000;
     }
+    if (cost > 0) { total += cost; lbl.textContent = cost.toFixed(3) + ' €'; }
+    else { lbl.textContent = '—'; }
   });
   var costEl = document.getElementById('p-matcost');
   var sugEl = document.getElementById('p-suggested');
@@ -1197,7 +1280,11 @@ function getMatRows() {
     var mat = cache.materials.find(function(m){ return m.id == sel.value; });
     var qty = parseFloat(inp.value)||0;
     if (sel.value && qty) {
-      var cost = (mat && mat.ppm2) ? (parseFloat(mat.ppm2)*qty/10000).toFixed(2) : null;
+      var cost = null;
+      if (mat) {
+        if (mat.type==='auxiliary' && mat.price_per_unit) cost = (parseFloat(mat.price_per_unit)*qty).toFixed(3);
+        else if (mat.ppm2) cost = (parseFloat(mat.ppm2)*qty/10000).toFixed(2);
+      }
       result.push({ mat_id: parseInt(sel.value), qty: qty, cost: cost });
     }
   });
